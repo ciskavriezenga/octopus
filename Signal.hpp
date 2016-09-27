@@ -33,13 +33,12 @@ namespace octo
         // A very simple low-pass filter
         auto filter = (x + Delay(x, 1)) * 0.5;
         @endcode */
-    template <class T>
+    template <class Clock, class T>
     class Signal : public SignalBase
     {
     public:
         //! Construct the signal
-        Signal(Clock& clock) :
-            clock(clock),
+        Signal() :
             cache(64)
         {
             
@@ -52,11 +51,12 @@ namespace octo
         T operator[](int z)
         {
             // If a sample before the beginning of clock time is asked, return 0
-            if (clock.now() < -z)
+            const auto now = Clock::now();
+            if (now < -z)
                 return 0;
             
             // Generate new samples up to the requested one
-            const auto requestedTimestamp = clock.now() + z;
+            const auto requestedTimestamp = now + z;
             while (timestamp <= requestedTimestamp)
             {
                 ++timestamp;
@@ -76,22 +76,19 @@ namespace octo
         //! Return the current sample of the signal
         explicit operator T() { return (*this)[0]; }
         
-        //! Return the clock this signal follows
-        Clock& getClock() { return clock; }
-        
         //! Move this signal to the heap
         /*! Signals need to implement this to support in-place creation of signals in expressions.
             @note This function can only be used on r-value signal objects. */
         virtual std::unique_ptr<Signal> moveToHeap() && = 0;
+        
+        //! The clock for this signal
+        using clock = Clock;
         
     private:
         //! Generate a new sample
         virtual void generateSample(T& out) = 0;
         
     private:
-        //! The clock at which this signal runs
-        Clock& clock;
-        
         //! A cache for previously generated samples
         std::vector<T> cache;
         
@@ -104,7 +101,7 @@ namespace octo
     
     // Convenience macro for overriding Signal::move()
     #define GENERATE_MOVE(CLASS) \
-    std::unique_ptr<octo::Signal<typename std::decay<decltype(std::declval<CLASS>()[unit::discrete<uint64_t>(0)])>::type>> moveToHeap() && override \
+    std::unique_ptr<octo::Signal<typename CLASS::clock, typename std::decay<decltype(std::declval<CLASS>()[unit::discrete<uint64_t>(0)])>::type>> moveToHeap() && override \
     { \
     return std::make_unique<CLASS>(std::move(*this)); \
     }

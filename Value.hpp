@@ -13,52 +13,37 @@ namespace octo
     //! Signal that depends on external factors to output its value
     /*! Value either takes its output from a constant variable, another referenced signal, or one it owns
         internally. It does not generate samples itself */
-    template <class T>
-    class Value : public Signal<T>
+    template <class Clock, class T>
+    class Value : public Signal<Clock, T>
     {
     public:
         //! Construct a value with constant value
-        Value(Clock& clock, const T& constant = {}) : Signal<T>(clock) { *this = constant; }
+        Value(const T& constant = {}) { *this = constant; }
         
         //! Construct a value referencing another signal
-        Value(Signal<T>& reference) : Signal<T>(reference.getClock()) { *this = reference; }
+        Value(Signal<Clock, T>& reference) { *this = reference; }
         
         //! Construct a value owning an internal signal
-        Value(std::unique_ptr<Signal<T>> internal) :
-            Signal<T>(internal ? internal->getClock() : throw std::invalid_argument("nullptr given to Value"))
-        {
-            *this = std::move(internal);
-        }
+        Value(std::unique_ptr<Signal<Clock, T>> internal) { *this = std::move(internal); }
         
         //! Copying a Value is forbidden
         Value(const Value&) = delete;
         
         //! Moving from a value
-        Value(Value&& rhs) :
-            Signal<T>(rhs.getClock())
-        {
-            *this = std::move(rhs);
-        }
+        Value(Value&& rhs) { *this = std::move(rhs); }
         
         //! Reference another Value
         /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
-        Value(Value& reference) :
-            Value(dynamic_cast<Signal<T>&>(reference))
-        {
-            
-        }
+        Value(Value& reference) : Value(dynamic_cast<Signal<Clock, T>&>(reference)) { }
         
         //! Destruct the value and release any contained data
-        ~Value()
-        {
-            *this = T{};
-        }
+        ~Value() { *this = T{}; }
         
         //! Assign a new constant to the value
         Value& operator=(const T& constant)
         {
             if (mode == ValueMode::INTERNAL)
-                internal.~unique_ptr<Signal<T>>();
+                internal.~unique_ptr<Signal<Clock, T>>();
             
             mode = ValueMode::CONSTANT;
             this->constant = constant;
@@ -67,11 +52,8 @@ namespace octo
         }
         
         //! Have the value reference another signal
-        Value& operator=(Signal<T>& reference)
+        Value& operator=(Signal<Clock, T>& reference)
         {
-            if (&reference.getClock() != &this->getClock())
-                throw std::runtime_error("tried assigning signal to value with a different clock");
-            
             *this = T{};
             
             mode = ValueMode::REFERENCE;
@@ -81,18 +63,15 @@ namespace octo
         }
         
         //! Have the value contain another signal
-        Value& operator=(std::unique_ptr<Signal<T>> internal)
+        Value& operator=(std::unique_ptr<Signal<Clock, T>> internal)
         {
             if (!internal)
                 throw std::invalid_argument("nullptr given to Value");
             
-            if (&internal->getClock() != &this->getClock())
-                throw std::runtime_error("tried assigning signal to value with a different clock");
-            
             *this = T{};
             
             mode = ValueMode::INTERNAL;
-            new (&this->internal) std::unique_ptr<Signal<T>>(std::move(internal));
+            new (&this->internal) std::unique_ptr<Signal<Clock, T>>(std::move(internal));
             
             return *this;
         }
@@ -112,7 +91,7 @@ namespace octo
             {
                 case ValueMode::CONSTANT: constant = rhs.constant; break;
                 case ValueMode::REFERENCE: reference = rhs.reference; break;
-                case ValueMode::INTERNAL: new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal)); break;
+                case ValueMode::INTERNAL: new (&internal) std::unique_ptr<Signal<Clock, T>>(std::move(rhs.internal)); break;
             }
             
             rhs = T{};
@@ -122,7 +101,7 @@ namespace octo
         
         //! Reference another Value
         /*! This overload is necessary, because otherwise the deleted copy assignment op is selected */
-        Value& operator=(Value& reference) { return *this = dynamic_cast<Signal<T>&>(reference); }
+        Value& operator=(Value& reference) { return *this = dynamic_cast<Signal<Clock, T>&>(reference); }
         
         //! Is this value a constant?
         bool isConstant() const noexcept { return mode == ValueMode::CONSTANT; }
@@ -145,7 +124,7 @@ namespace octo
         
         //! Return a reference to the contained/referenced signal
         /*! @throw std::runtime_error if the value is a constant */
-        const Signal<T>& getReference() const
+        const Signal<Clock, T>& getReference() const
         {
             switch (mode)
             {
@@ -156,6 +135,11 @@ namespace octo
         }
         
         GENERATE_MOVE(Value)
+        
+//        std::unique_ptr<Signal<typename Value::clock, T>> moveToHeap() && override final
+//        {
+//            return std::make_unique<Value>(*this);
+//        }
         
     private:
         //! Generate a new sample
@@ -180,16 +164,16 @@ namespace octo
             T constant;
             
             //! Holds non-owned signal pointer if mode == ValueMode::NON_OWNED
-            Signal<T>* reference;
+            Signal<Clock, T>* reference;
             
             //! Holds owned signal unique_ptr if mode == ValueMode::OWNED
-            std::unique_ptr<Signal<T>> internal;
+            std::unique_ptr<Signal<Clock, T>> internal;
         };
     };
     
     //! Compare two values for equality
-    template <class T>
-    bool operator==(const Value<T>& lhs, const Value<T>& rhs)
+    template <class Clock, class T>
+    bool operator==(const Value<Clock, T>& lhs, const Value<Clock, T>& rhs)
     {
         if (lhs.isConstant() && rhs.isConstant())
             return lhs.getConstant() == rhs.getConstant();
@@ -198,8 +182,8 @@ namespace octo
     }
     
     //! Compare two values for inequality
-    template <class T>
-    bool operator!=(const Value<T>& lhs, const Value<T>& rhs)
+    template <class Clock, class T>
+    bool operator!=(const Value<Clock, T>& lhs, const Value<Clock, T>& rhs)
     {
         return !(lhs == rhs);
     }

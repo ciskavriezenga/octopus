@@ -17,22 +17,14 @@
 namespace octo
 {
     //! Sums an variadic amount of values into one
-    template <class T>
-    class Sine : public Signal<T>
+    template <class Clock, class T>
+    class Sine : public Signal<Clock, T>
     {
     public:
         //! Construct an empty sum
-        Sine(Clock& clock) :
-            Signal<T>(clock),
-            frequency(clock),
-            phase(clock)
-        {
-            
-        }
+        Sine() = default;
         
-        template <class U, class V>
-        Sine(Clock& clock, Value<float> frequency, Value<float> phase) :
-            Signal<T>(clock),
+        Sine(Value<Clock, float> frequency, Value<Clock, float> phase = 0) :
             frequency(std::move(frequency)),
             phase(std::move(phase))
         {
@@ -43,16 +35,16 @@ namespace octo
         
     public:
         //! The frequency of the sine
-        Value<float> frequency;
+        Value<Clock, float> frequency;
         
         //! The phase offset of the sine
-        Value<float> phase;
+        Value<Clock, float> phase;
         
     private:
         void generateSample(T& out) override final
         {
             out = std::sin(theta * 6.28318530718 + phase[0]);
-            theta += 1.0 / this->getClock().rate() * frequency[0];
+            theta += 1.0 / Clock::rate() * frequency[0];
         }
         
     private:
