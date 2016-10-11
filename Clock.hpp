@@ -1,3 +1,11 @@
+//
+//  Clock.hpp
+//  octopus
+//
+//  Created by Stijn on 11/10/2016.
+//
+//
+
 #ifndef OCTOPUS_CLOCK_HPP
 #define OCTOPUS_CLOCK_HPP
 
@@ -7,28 +15,26 @@
 
 namespace octo
 {
+    template <class Domain>
     class Clock
     {
     public:
-        //! Construct a clock at a given rate
-        Clock(unit::hertz<float> rate) : rate_(rate) { }
+        static void setRate(unit::hertz<float> rate) { Clock::rate = rate; }
+        static unit::hertz<float> getRate() { return rate; }
         
-        //! Move to the next timestamp
-        unit::discrete<uint64_t> tick() { return ++now_; }
-        
-        //! Return the current timestamp of the clock
-        unit::discrete<uint64_t> now() const { return now_; }
-        
-        //! Return the rate at which the clock runs
-        unit::hertz<float> rate() const { return rate_; }
+        static unit::discrete<uint64_t> tick() { return ++timestamp; }
+        static unit::discrete<uint64_t> now() { return timestamp; }
         
     private:
-        //! The current timestamp of the clock
-        unit::discrete<uint64_t> now_ = 0;
-        
-        //! The rate at which the clock runs
-        unit::hertz<float> rate_ = 0;
+        static unit::hertz<float> rate;
+        static unit::discrete<uint64_t> timestamp;
     };
+    
+    template <class Domain>
+    unit::hertz<float> Clock<Domain>::rate = 44100;
+    
+    template <class Domain>
+    unit::discrete<uint64_t> Clock<Domain>::timestamp = 0;
 }
 
 #endif

@@ -1,21 +1,22 @@
 #ifndef OCTOPUS_SUM_HPP
 #define OCTOPUS_SUM_HPP
 
+#include <type_traits>
+
 #include "Fold.hpp"
 
 namespace octo
 {
     //! Sums an variadic amount of values into one
-    template <class T>
-    class Sum : public Fold<T>
+    template <class Domain, class T>
+    class Sum : public Fold<Domain, T>
     {
     public:
         //! Construct an empty sum
-        Sum(Clock& clock) : Fold<T>(clock) { }
+        Sum() = default;
         
         //! Construct a sum with two terms
-        Sum(Value<T> lhs, Value<T> rhs) :
-            Fold<T>(lhs.getClock())
+        Sum(Value<Domain, T> lhs, Value<Domain, T> rhs)
         {
             this->emplace(std::move(lhs));
             this->emplace(std::move(rhs));
@@ -37,35 +38,35 @@ namespace octo
         T fold(const T& in, const T& out) const final override { return in + out; }
     };
     
-    template <class T, class U>
-    Sum<T> operator+(const T& lhs, Signal<U>& rhs) { return {lhs, rhs}; }
+    template <class Domain, class T1, class T2>
+    std::enable_if_t<std::is_convertible<T1, T2>::value, Sum<Domain, T2>> operator+(const T1& lhs, Signal<Domain, T2>& rhs) { return {lhs, rhs}; }
     
-    template <class T, class U>
-    Sum<T> operator+(const T& lhs, Signal<U>&& rhs) { return {lhs, std::move(rhs).moveToHeap()}; }
+    template <class Domain, class T1, class T2>
+    std::enable_if_t<std::is_convertible<T1, T2>::value, Sum<Domain, T2>> operator+(const T1& lhs, Signal<Domain, T2>&& rhs) { return {lhs, std::move(rhs).moveToHeap()}; }
     
-    template <class T, class U>
-    Sum<T> operator+(Signal<T>& lhs, const U& rhs) { auto& clock = lhs.getClock(); return {lhs, {clock, static_cast<T>(rhs)}}; }
+    template <class Domain, class T1, class T2>
+    std::enable_if_t<std::is_convertible<T2, T1>::value, Sum<Domain, T1>> operator+(Signal<Domain, T1>& lhs, const T2& rhs) { return {lhs, rhs}; }
     
-    template <class T, class U>
-    Sum<T> operator+(Signal<T>& lhs, Signal<U>& rhs) { return {lhs, rhs}; }
+    template <class Domain, class T1, class T2>
+    Sum<Domain, std::common_type_t<T1, T2>> operator+(Signal<Domain, T1>& lhs, Signal<Domain, T2>& rhs) { return {lhs, rhs}; }
     
-    template <class T, class U>
-    Sum<T> operator+(Signal<T>& lhs, Signal<U>&& rhs) { return {lhs, std::move(rhs).moveToHeap()}; }
+    template <class Domain, class T1, class T2>
+    Sum<Domain, std::common_type_t<T1, T2>> operator+(Signal<Domain, T1>& lhs, Signal<Domain, T2>&& rhs) { return {lhs, std::move(rhs).moveToHeap()}; }
     
-    template <class T, class U>
-    Sum<T> operator+(Signal<T>&& lhs, const U& rhs) { auto& clock = lhs.getClock(); return {std::move(lhs).moveToHeap(), {clock, static_cast<T>(rhs)}}; }
+    template <class Domain, class T1, class T2>
+    std::enable_if_t<std::is_convertible<T2, T1>::value, Sum<Domain, T1>> operator+(Signal<Domain, T1>&& lhs, const T2& rhs) { return {std::move(lhs).moveToHeap(), rhs}; }
     
-    template <class T, class U>
-    Sum<T> operator+(Signal<T>&& lhs, Signal<U>& rhs) { return {std::move(lhs).moveToHeap(), rhs}; }
+    template <class Domain, class T1, class T2>
+    Sum<Domain, std::common_type_t<T1, T2>> operator+(Signal<Domain, T1>&& lhs, Signal<Domain, T2>& rhs) { return {std::move(lhs).moveToHeap(), rhs}; }
     
-    template <class T, class U>
-    Sum<T> operator+(Signal<T>&& lhs, Signal<U>&& rhs) { return {std::move(lhs).moveToHeap(), std::move(rhs).moveToHeap()}; }
+    template <class Domain, class T1, class T2>
+    Sum<Domain, std::common_type_t<T1, T2>> operator+(Signal<Domain, T1>&& lhs, Signal<Domain, T2>&& rhs) { return {std::move(lhs).moveToHeap(), std::move(rhs).moveToHeap()}; }
     
-    template <class T, class U>
-    Sum<T> operator+(Sum<T>&& lhs, U&& rhs) { lhs.emplace(std::forward<U&&>(rhs)); return std::move(lhs); }
+    template <class Domain, class T1, class T2>
+    Sum<Domain, T1> operator+(Sum<Domain, T1>&& lhs, T2&& rhs) { lhs.emplace(std::forward<T2&&>(rhs)); return std::move(lhs); }
     
-    template <class T, class U>
-    Sum<U> operator+(T&& lhs, Sum<U>&& rhs) { rhs.emplace(std::forward<T&&>(lhs)); return std::move(rhs); }
+    template <class Domain, class T1, class T2>
+    Sum<Domain, T2> operator+(T1&& lhs, Sum<Domain, T2>&& rhs) { rhs.emplace(std::forward<T1&&>(lhs)); return std::move(rhs); }
 }
 
 #endif

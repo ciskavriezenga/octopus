@@ -11,26 +11,14 @@
 namespace octo
 {
     //! Folds a variadic amount of signals into one
-    template <class In, class Out = In>
-    class Fold : public Signal<Out>
+    template <class Domain, class In, class Out = In>
+    class Fold : public Signal<Domain, Out>
     {
     public:
-        //! Construct the fold
-        Fold(Clock& clock) : Signal<Out>(clock) { }
-        
         //! Add a new input to the fold
-        void emplace(Value<In> input)
+        void emplace(Value<Domain, In> input)
         {
-            if (&input.getClock() != &this->getClock())
-                throw std::runtime_error("Fold doesn't take inputs of different clocks");
-            
             inputs.emplace_back(std::move(input));
-        }
-        
-        template <class T>
-        std::enable_if_t<std::is_convertible<T, In>::value> emplace(const T& input)
-        {
-            inputs.emplace_back(this->getClock(), static_cast<In>(input));
         }
         
     private:
@@ -48,7 +36,7 @@ namespace octo
         
     private:
         //! The inputs to the fold
-        std::vector<Value<In>> inputs;
+        std::vector<Value<Domain, In>> inputs;
     };
 }
 
