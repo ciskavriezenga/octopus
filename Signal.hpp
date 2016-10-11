@@ -33,13 +33,14 @@ namespace octo
         // A very simple low-pass filter
         auto filter = (x + Delay(x, 1)) * 0.5;
         @endcode */
-    template <class Clock, class T>
+    template <class Domain, class T>
     class Signal : public SignalBase
     {
     public:
         //! Construct the signal
         Signal() :
-            cache(64)
+            cache(64),
+            timestamp(Clock<Domain>::now())
         {
             
         }
@@ -51,7 +52,7 @@ namespace octo
         T operator[](int z)
         {
             // If a sample before the beginning of clock time is asked, return 0
-            const auto now = Clock::now();
+            const auto now = Clock<Domain>::now();
             if (now < -z)
                 return 0;
             
@@ -81,8 +82,8 @@ namespace octo
             @note This function can only be used on r-value signal objects. */
         virtual std::unique_ptr<Signal> moveToHeap() && = 0;
         
-        //! The clock for this signal
-        using clock = Clock;
+        //! The domain for this signal
+        using domain = Domain;
         
     private:
         //! Generate a new sample
@@ -101,7 +102,7 @@ namespace octo
     
     // Convenience macro for overriding Signal::move()
     #define GENERATE_MOVE(CLASS) \
-    std::unique_ptr<octo::Signal<typename CLASS::clock, typename std::decay<decltype(std::declval<CLASS>()[unit::discrete<uint64_t>(0)])>::type>> moveToHeap() && override \
+    std::unique_ptr<octo::Signal<typename CLASS::domain, typename std::decay<decltype(std::declval<CLASS>()[unit::discrete<uint64_t>(0)])>::type>> moveToHeap() && override \
     { \
     return std::make_unique<CLASS>(std::move(*this)); \
     }

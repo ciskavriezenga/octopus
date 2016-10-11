@@ -24,6 +24,9 @@ namespace octo
         Value(Signal<Clock, T>& reference) { *this = reference; }
         
         //! Construct a value owning an internal signal
+        Value(Signal<Clock, T>&& internal) { *this = std::move(internal); }
+        
+        //! Construct a value owning an internal signal
         Value(std::unique_ptr<Signal<Clock, T>> internal) { *this = std::move(internal); }
         
         //! Copying a Value is forbidden
@@ -60,6 +63,12 @@ namespace octo
             this->reference = &reference;
             
             return *this;
+        }
+        
+        //! Have the value contain another signal
+        Value& operator=(Signal<Clock, T>&& internal)
+        {
+            return *this = std::move(internal).moveToHeap();
         }
         
         //! Have the value contain another signal

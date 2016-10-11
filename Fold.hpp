@@ -11,12 +11,12 @@
 namespace octo
 {
     //! Folds a variadic amount of signals into one
-    template <class Clock, class In, class Out = In>
-    class Fold : public Signal<Clock, Out>
+    template <class Domain, class In, class Out = In>
+    class Fold : public Signal<Domain, Out>
     {
     public:
         //! Add a new input to the fold
-        void emplace(Value<Clock, In> input)
+        void emplace(Value<Domain, In> input)
         {
             inputs.emplace_back(std::move(input));
         }
@@ -36,7 +36,7 @@ namespace octo
         
     private:
         //! The inputs to the fold
-        std::vector<Value<Clock, In>> inputs;
+        std::vector<Value<Domain, In>> inputs;
     };
 }
 

@@ -9,7 +9,9 @@ add_library(octopus SHARED "")
 
 # Core
 set(HEADERS
+    Clock.hpp
     Fold.hpp
+    Latest.hpp
     Node.hpp
 	Signal.hpp
 	SignalBase.hpp
