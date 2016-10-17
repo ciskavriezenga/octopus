@@ -14,6 +14,7 @@ set(HEADERS
     Clock.hpp
     Division.hpp
     Fold.hpp
+    Join.hpp
     Latest.hpp
     Negation.hpp
     Node.hpp

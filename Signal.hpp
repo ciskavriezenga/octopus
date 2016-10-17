@@ -54,7 +54,7 @@ namespace octo
             // If a sample before the beginning of clock time is asked, return 0
             const auto now = Domain::clock.now();
             if (now < -z)
-                return 0;
+                return T{};
             
             // Generate new samples up to the requested one
             const auto requestedTimestamp = now + z;
