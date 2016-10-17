@@ -24,7 +24,7 @@ namespace octo
     public:
         //! Construct the split
         /*! size The amount of sieves in the split */
-        Split(std::size_t size)
+        Split(std::size_t size = 0)
         {
             resize(size);
         }
