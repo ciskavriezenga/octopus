@@ -35,13 +35,13 @@ namespace octo
         void setRate(unit::hertz<float> rate) { _rate = rate; }
         
         //! Return the rate at which the clock runs
-        unit::hertz<float> getRate() const override final { return _rate; }
+        unit::hertz<float> getRate() const final override { return _rate; }
         
         //! Move the clock to its next time index
         unit::discrete<uint64_t> tick() { return ++timestamp; }
         
         //! Return the clocks current time index
-        unit::discrete<uint64_t> now() const override final { return timestamp; }
+        unit::discrete<uint64_t> now() const final override { return timestamp; }
         
     private:
         //! The rate at which the clock runs

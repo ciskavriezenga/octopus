@@ -34,7 +34,7 @@ namespace octo
         
     private:
         //! Generate a sample in the destination domain by retrieving the latest from the source domain
-        void generateSample(T& out) override final { out = input[0]; }
+        void generateSample(T& out) final override { out = input[0]; }
     };
 }
 

@@ -50,10 +50,10 @@ namespace octo
         }
         
         //! Return one of the output sieves
-        Sieve<Domain, T>& getOutput(std::size_t index) override final { return sieves.at(index); }
+        Sieve<Domain, T>& getOutput(std::size_t index) final override { return sieves.at(index); }
         
         //! Return the number of output sieves
-        std::size_t getOutputCount() const override final { return sieves.size(); }
+        std::size_t getOutputCount() const final override { return sieves.size(); }
         
     public:
         //! The input to the split

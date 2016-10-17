@@ -23,7 +23,7 @@ namespace octo
         
     private:
         //! Generate a new sample
-        void generateSample(Out& out) override final
+        void generateSample(Out& out) final override
         {
             if (inputs.empty())
                 out = {};

@@ -16,7 +16,7 @@
 
 namespace octo
 {
-    //! Sums an variadic amount of values into one
+    //! Generates a sine wave with a given frequency and phase offset
     template <class Domain, class T>
     class Sine : public Signal<Domain, T>
     {
@@ -43,7 +43,7 @@ namespace octo
         
     private:
         //! Generate the next sample of the sine
-        void generateSample(T& out) override final
+        void generateSample(T& out) final override
         {
             out = std::sin(phase * 6.28318530718 + phaseOffset[0]);
             phase += 1.0 / Domain::clock.getRate() * frequency[0];

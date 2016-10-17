@@ -35,10 +35,10 @@ namespace octo
         
     private:
         //! Return the monoid identity
-        std::vector<T> init() const override final { return {}; }
+        std::vector<T> init() const final override { return {}; }
         
         //! The monoid binary operation
-        std::vector<T> fold(const std::vector<T>& acc, const T& x) const override final
+        std::vector<T> fold(const std::vector<T>& acc, const T& x) const final override
         {
             auto y = acc;
             y.emplace_back(x);

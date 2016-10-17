@@ -39,7 +39,7 @@ namespace octo
         
     private:
         //! Generate a new sample
-        void generateSample(T& out) override final
+        void generateSample(T& out) final override
         {
             combineSamples(lhs[0], rhs[0], out);
         }

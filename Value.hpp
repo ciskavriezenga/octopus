@@ -145,14 +145,14 @@ namespace octo
         
         GENERATE_MOVE(Value)
         
-//        std::unique_ptr<Signal<typename Value::clock, T>> moveToHeap() && override final
+//        std::unique_ptr<Signal<typename Value::clock, T>> moveToHeap() && final override
 //        {
 //            return std::make_unique<Value>(*this);
 //        }
         
     private:
         //! Generate a new sample
-        void generateSample(T& out) override final
+        void generateSample(T& out) final override
         {
             switch (mode)
             {
