@@ -9,15 +9,21 @@ add_library(octopus SHARED "")
 
 # Core
 set(HEADERS
+    Arithmetic.hpp
+    BinaryOperation.hpp
     Clock.hpp
+    Division.hpp
     Fold.hpp
     Latest.hpp
+    Negation.hpp
     Node.hpp
     Product.hpp
 	Signal.hpp
 	SignalBase.hpp
     Sine.hpp
+    Subtraction.hpp
     Sum.hpp
+    UnaryOperation.hpp
     Value.hpp)
 
 set(SOURCES

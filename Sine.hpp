@@ -21,12 +21,13 @@ namespace octo
     class Sine : public Signal<Domain, T>
     {
     public:
-        //! Construct an empty sum
+        //! Construct a sum with a frequency of 0 and phase offset of 0
         Sine() = default;
         
-        Sine(Value<Domain, float> frequency, Value<Domain, float> phase = 0) :
+        //! Construct
+        Sine(Value<Domain, float> frequency, Value<Domain, float> phaseOffset = 0) :
             frequency(std::move(frequency)),
-            phase(std::move(phase))
+            phaseOffset(std::move(phaseOffset))
         {
             
         }
@@ -38,17 +39,19 @@ namespace octo
         Value<Domain, float> frequency;
         
         //! The phase offset of the sine
-        Value<Domain, float> phase;
+        Value<Domain, float> phaseOffset;
         
     private:
+        //! Generate the next sample of the sine
         void generateSample(T& out) override final
         {
-            out = std::sin(theta * 6.28318530718 + phase[0]);
-            theta += 1.0 / Domain::clock.getRate() * frequency[0];
+            out = std::sin(phase * 6.28318530718 + phaseOffset[0]);
+            phase += 1.0 / Domain::clock.getRate() * frequency[0];
         }
         
     private:
-        long double theta = 0;
+        //! The current phase of the sine
+        long double phase = 0;
     };
 }
 

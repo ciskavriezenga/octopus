@@ -25,7 +25,10 @@ namespace octo
         //! Generate a new sample
         void generateSample(Out& out) override final
         {
-            out = std::accumulate(inputs.begin(), inputs.end(), init(), [&](auto& a, auto& b){ return fold(a, b[0]); });
+            if (inputs.empty())
+                out = {};
+            else
+                out = std::accumulate(inputs.begin(), inputs.end(), init(), [&](auto& a, auto& b){ return fold(a, b[0]); });
         }
         
         //! Return the initial value of the fold
