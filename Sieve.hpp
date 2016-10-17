@@ -21,7 +21,7 @@ namespace octo
     {
     public:
         //! Create the sieve by passing the channel
-        Sieve(unsigned int channel) :
+        Sieve(unsigned int channel = 0) :
             channel(channel)
         {
             

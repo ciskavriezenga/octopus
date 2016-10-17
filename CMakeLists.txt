@@ -14,6 +14,7 @@ set(HEADERS
     Clock.hpp
     Division.hpp
     Fold.hpp
+    Group.hpp
     Join.hpp
     Latest.hpp
     Negation.hpp
@@ -23,6 +24,7 @@ set(HEADERS
 	Signal.hpp
 	SignalBase.hpp
     Sine.hpp
+    Split.hpp
     Subtraction.hpp
     Sum.hpp
     UnaryOperation.hpp
