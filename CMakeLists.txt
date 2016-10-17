@@ -13,6 +13,7 @@ set(HEADERS
     Fold.hpp
     Latest.hpp
     Node.hpp
+    Product.hpp
 	Signal.hpp
 	SignalBase.hpp
     Sine.hpp

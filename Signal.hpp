@@ -40,7 +40,7 @@ namespace octo
         //! Construct the signal
         Signal() :
             cache(64),
-            timestamp(Clock<Domain>::now())
+            timestamp(Domain::clock.now())
         {
             
         }
@@ -52,7 +52,7 @@ namespace octo
         T operator[](int z)
         {
             // If a sample before the beginning of clock time is asked, return 0
-            const auto now = Clock<Domain>::now();
+            const auto now = Domain::clock.now();
             if (now < -z)
                 return 0;
             
