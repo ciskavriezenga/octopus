@@ -19,6 +19,7 @@ set(HEADERS
     Negation.hpp
     Node.hpp
     Product.hpp
+    Sieve.hpp
 	Signal.hpp
 	SignalBase.hpp
     Sine.hpp

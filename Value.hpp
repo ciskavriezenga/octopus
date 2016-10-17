@@ -49,7 +49,7 @@ namespace octo
                 internal.~unique_ptr<Signal<Clock, T>>();
             
             mode = ValueMode::CONSTANT;
-            this->constant = constant;
+            new (&this->constant) T(constant);
             
             return *this;
         }
@@ -60,7 +60,7 @@ namespace octo
             *this = T{};
             
             mode = ValueMode::REFERENCE;
-            this->reference = &reference;
+            new (&this->reference) Signal<Clock, T>*(&reference);
             
             return *this;
         }
