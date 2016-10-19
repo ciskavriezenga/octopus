@@ -46,7 +46,7 @@ namespace octo
         void generateSample(T& out) final override
         {
             out = std::sin(phase * 6.28318530718 + phaseOffset[0]);
-            phase += 1.0 / Domain::clock.getRate() * frequency[0];
+            phase += Domain::clock.getDeltaPeriod() * frequency[0];
         }
         
     private:
