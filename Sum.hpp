@@ -16,7 +16,7 @@ namespace octo
         Sum(Clock& clock) : Fold<T>(clock) { }
         
         //! Construct a sum with two terms and a clock
-        Product(Clock& clock, Value<T> lhs, Value<T> rhs) :
+        Sum(Clock& clock, Value<T> lhs, Value<T> rhs) :
             Fold<T>(clock)
         {
             this->emplace(std::move(lhs));
@@ -25,7 +25,7 @@ namespace octo
         
         //! Construct a sum with two terms
         Sum(Value<T> lhs, Value<T> rhs) :
-        Sum(lhs.getClock(), std::move(lhs), std::move(rhs))
+            Sum(lhs.getClock(), std::move(lhs), std::move(rhs))
         {
             if (&lhs.getClock() != &rhs.getClock())
                 throw std::runtime_error("clocks of lhs and rhs of sum don't match");
