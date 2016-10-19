@@ -14,12 +14,12 @@
 namespace octo
 {
     //! Negate a signal
-    template <class Domain, class T>
-    class Negation : public UnaryOperation<Domain, T>
+    template <class T>
+    class Negation : public UnaryOperation<T>
     {
     public:
         // Use the constructor from UnaryOperation
-        using UnaryOperation<Domain, T>::UnaryOperation;
+        using UnaryOperation<T>::UnaryOperation;
         
         // Generate the moveToHeap() function
         GENERATE_MOVE(Negation)

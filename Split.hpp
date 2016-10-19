@@ -18,7 +18,7 @@
 namespace octo
 {
     //! Splits a multi-channel signal into multiple single-channel ones
-    template <class Domain, class T>
+    template <class T>
     class Split : public Group
     {
     public:
@@ -30,7 +30,7 @@ namespace octo
         }
         
         //! Construct the split by providing size and input
-        Split(std::size_t size, Value<Domain, std::vector<T>> input) :
+        Split(std::size_t size, Value<std::vector<T>> input) :
             input(std::move(input))
         {
             resize(size);
@@ -50,18 +50,18 @@ namespace octo
         }
         
         //! Return one of the output sieves
-        Sieve<Domain, T>& getOutput(std::size_t index) final override { return sieves.at(index); }
+        Sieve<T>& getOutput(std::size_t index) final override { return sieves.at(index); }
         
         //! Return the number of output sieves
         std::size_t getOutputCount() const final override { return sieves.size(); }
         
     public:
         //! The input to the split
-        Value<Domain, std::vector<T>> input;
+        Value<std::vector<T>> input;
         
     private:
         //! The sieves that split the signal
-        std::vector<Sieve<Domain, T>> sieves;
+        std::vector<Sieve<T>> sieves;
     };
 }
 

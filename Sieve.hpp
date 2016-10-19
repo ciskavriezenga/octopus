@@ -16,8 +16,8 @@
 namespace octo
 {
     //! Sifts out a single channel from a multi-channel signal
-    template <class Domain, class T>
-    class Sieve : public UnaryOperation<Domain, std::vector<T>, T>
+    template <class T>
+    class Sieve : public UnaryOperation<std::vector<T>, T>
     {
     public:
         //! Create the sieve by passing the channel
@@ -28,8 +28,8 @@ namespace octo
         }
         
         //! Create the sieve by passing the channel and input
-        Sieve(unsigned int channel, Value<Domain, std::vector<T>> input) :
-            UnaryOperation<Domain, std::vector<T>, T>(std::move(input)),
+        Sieve(unsigned int channel, Value<std::vector<T>> input) :
+            UnaryOperation<std::vector<T>, T>(std::move(input)),
             channel(channel)
         {
             

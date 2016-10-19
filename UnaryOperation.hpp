@@ -15,15 +15,15 @@
 namespace octo
 {
     //! Transform a single signal into another
-    template <class Domain, class In, class Out = In>
-    class UnaryOperation : public Signal<Domain, Out>
+    template <class In, class Out = In>
+    class UnaryOperation : public Signal<Out>
     {
     public:
         //! Construct an empty unary operation
         UnaryOperation() = default;
         
         //! Construct the unary operation with its input
-        UnaryOperation(Value<Domain, In> input) :
+        UnaryOperation(Value<In> input) :
             input(std::move(input))
         {
             
@@ -31,7 +31,7 @@ namespace octo
         
     public:
         //! The input to the operation
-        Value<Domain, In> input;
+        Value<In> input;
     };
 }
 

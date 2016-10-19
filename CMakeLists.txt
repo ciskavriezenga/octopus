@@ -16,7 +16,6 @@ set(HEADERS
     Fold.hpp
     Group.hpp
     Join.hpp
-    Latest.hpp
     Negation.hpp
     Node.hpp
     Product.hpp

@@ -16,15 +16,15 @@
 namespace octo
 {
     //! Joins multiple signals into one multi-channel signal
-    template <class Domain, class T>
-    class Join : public Fold<Domain, T, std::vector<T>>
+    template <class T>
+    class Join : public Fold<T, std::vector<T>>
     {
     public:        
         //! Construct an empty join
         Join() = default;
         
         //! Construct a join with two channels
-        Join(Value<Domain, T> lhs, Value<Domain, T> rhs)
+        Join(Value<T> lhs, Value<T> rhs)
         {
             this->emplace(std::move(lhs));
             this->emplace(std::move(rhs));
@@ -47,44 +47,44 @@ namespace octo
     };
     
     //! Combine a scalar and a signal into a join
-    template <class Domain, class T1, class T2>
-    std::enable_if_t<std::is_convertible<T1, T2>::value, Join<Domain, T2>> operator&(const T1& lhs, Signal<Domain, T2>& rhs) { return {lhs, rhs}; }
+    template <class T1, class T2>
+    std::enable_if_t<std::is_convertible<T1, T2>::value, Join<T2>> operator&(const T1& lhs, Signal<T2>& rhs) { return {lhs, rhs}; }
     
     //! Combine a scalar and a signal into a join
-    template <class Domain, class T1, class T2>
-    std::enable_if_t<std::is_convertible<T1, T2>::value, Join<Domain, T2>> operator&(const T1& lhs, Signal<Domain, T2>&& rhs) { return {lhs, std::move(rhs).moveToHeap()}; }
+    template <class T1, class T2>
+    std::enable_if_t<std::is_convertible<T1, T2>::value, Join<T2>> operator&(const T1& lhs, Signal<T2>&& rhs) { return {lhs, std::move(rhs).moveToHeap()}; }
     
     //! Combine a scalar and a signal into a join
-    template <class Domain, class T1, class T2>
-    std::enable_if_t<std::is_convertible<T2, T1>::value, Join<Domain, T1>> operator&(Signal<Domain, T1>& lhs, const T2& rhs) { return {lhs, rhs}; }
+    template <class T1, class T2>
+    std::enable_if_t<std::is_convertible<T2, T1>::value, Join<T1>> operator&(Signal<T1>& lhs, const T2& rhs) { return {lhs, rhs}; }
     
     //! Combine two signals into a join
-    template <class Domain, class T1, class T2>
-    Join<Domain, std::common_type_t<T1, T2>> operator&(Signal<Domain, T1>& lhs, Signal<Domain, T2>& rhs) { return {lhs, rhs}; }
+    template <class T1, class T2>
+    Join<std::common_type_t<T1, T2>> operator&(Signal<T1>& lhs, Signal<T2>& rhs) { return {lhs, rhs}; }
     
     //! Combine two signals into a join
-    template <class Domain, class T1, class T2>
-    Join<Domain, std::common_type_t<T1, T2>> operator&(Signal<Domain, T1>& lhs, Signal<Domain, T2>&& rhs) { return {lhs, std::move(rhs).moveToHeap()}; }
+    template <class T1, class T2>
+    Join<std::common_type_t<T1, T2>> operator&(Signal<T1>& lhs, Signal<T2>&& rhs) { return {lhs, std::move(rhs).moveToHeap()}; }
     
     //! Combine a scalar and a signal into a join
-    template <class Domain, class T1, class T2>
-    std::enable_if_t<std::is_convertible<T2, T1>::value, Join<Domain, T1>> operator&(Signal<Domain, T1>&& lhs, const T2& rhs) { return {std::move(lhs).moveToHeap(), rhs}; }
+    template <class T1, class T2>
+    std::enable_if_t<std::is_convertible<T2, T1>::value, Join<T1>> operator&(Signal<T1>&& lhs, const T2& rhs) { return {std::move(lhs).moveToHeap(), rhs}; }
     
     //! Combine two signals into a join
-    template <class Domain, class T1, class T2>
-    Join<Domain, std::common_type_t<T1, T2>> operator&(Signal<Domain, T1>&& lhs, Signal<Domain, T2>& rhs) { return {std::move(lhs).moveToHeap(), rhs}; }
+    template <class T1, class T2>
+    Join<std::common_type_t<T1, T2>> operator&(Signal<T1>&& lhs, Signal<T2>& rhs) { return {std::move(lhs).moveToHeap(), rhs}; }
     
     //! Combine two signals into a join
-    template <class Domain, class T1, class T2>
-    Join<Domain, std::common_type_t<T1, T2>> operator&(Signal<Domain, T1>&& lhs, Signal<Domain, T2>&& rhs) { return {std::move(lhs).moveToHeap(), std::move(rhs).moveToHeap()}; }
+    template <class T1, class T2>
+    Join<std::common_type_t<T1, T2>> operator&(Signal<T1>&& lhs, Signal<T2>&& rhs) { return {std::move(lhs).moveToHeap(), std::move(rhs).moveToHeap()}; }
     
     //! Add another term to a join
-    template <class Domain, class T1, class T2>
-    Join<Domain, T1> operator&(Join<Domain, T1>&& lhs, T2&& rhs) { lhs.emplace(std::forward<T2&&>(rhs)); return std::move(lhs); }
+    template <class T1, class T2>
+    Join<T1> operator&(Join<T1>&& lhs, T2&& rhs) { lhs.emplace(std::forward<T2&&>(rhs)); return std::move(lhs); }
     
     //! Add another term to a join
-    template <class Domain, class T1, class T2>
-    Join<Domain, T2> operator&(T1&& lhs, Join<Domain, T2>&& rhs) { rhs.emplace(std::forward<T1&&>(lhs)); return std::move(rhs); }
+    template <class T1, class T2>
+    Join<T2> operator&(T1&& lhs, Join<T2>&& rhs) { rhs.emplace(std::forward<T1&&>(lhs)); return std::move(rhs); }
 }
 
 #endif

@@ -33,14 +33,15 @@ namespace octo
         // A very simple low-pass filter
         auto filter = (x + Delay(x, 1)) * 0.5;
         @endcode */
-    template <class Domain, class T>
+    template <class T>
     class Signal : public SignalBase
     {
     public:
         //! Construct the signal
-        Signal() :
+        Signal(Clock& clock) :
             cache(64),
-            timestamp(Domain::clock.now())
+            timestamp(clock.now()),
+            clock(&clock)
         {
             
         }
@@ -52,7 +53,7 @@ namespace octo
         T operator[](int z)
         {
             // If a sample before the beginning of clock time is asked, return 0
-            const auto now = Domain::clock.now();
+            const auto now = clock->now();
             if (now < -z)
                 return T{};
             
@@ -82,14 +83,17 @@ namespace octo
             @note This function can only be used on r-value signal objects. */
         virtual std::unique_ptr<Signal> moveToHeap() && = 0;
         
-        //! The domain for this signal
-        using domain = Domain;
+        //! Retrieve the clock this signal runs at
+        Clock& getClock() const { return *clock; }
         
     private:
         //! Generate a new sample
         virtual void generateSample(T& out) = 0;
         
     private:
+        //! The clock this signal runs at
+        Clock* clock = nullptr;
+        
         //! A cache for previously generated samples
         std::vector<T> cache;
         
@@ -102,9 +106,9 @@ namespace octo
     
     // Convenience macro for overriding Signal::move()
     #define GENERATE_MOVE(CLASS) \
-    std::unique_ptr<octo::Signal<typename CLASS::domain, typename std::decay<decltype(std::declval<CLASS>()[unit::discrete<uint64_t>(0)])>::type>> moveToHeap() && override \
+    std::unique_ptr<octo::Signal<typename std::decay<decltype(std::declval<CLASS>()[unit::discrete<uint64_t>(0)])>::type>> moveToHeap() && override \
     { \
-    return std::make_unique<CLASS>(std::move(*this)); \
+        return std::make_unique<CLASS>(std::move(*this)); \
     }
 }
 
