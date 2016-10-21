@@ -21,16 +21,24 @@ namespace octo
     {
     public:
         //! Create the sieve by passing the channel
-        Sieve(unsigned int channel = 0) :
+        Sieve(Clock& clock, unsigned int channel = 0) :
+            UnaryOperation<std::vector<T>, T>(clock),
             channel(channel)
         {
             
         }
         
         //! Create the sieve by passing the channel and input
-        Sieve(unsigned int channel, Value<std::vector<T>> input) :
-            UnaryOperation<std::vector<T>, T>(std::move(input)),
+        Sieve(Clock& clock, Value<std::vector<T>> input, unsigned int channel = 0) :
+            UnaryOperation<std::vector<T>, T>(clock, std::move(input)),
             channel(channel)
+        {
+            
+        }
+        
+        //! Create the sive by passin the channel and input
+        Sieve(Value<std::vector<T>> input, unsigned int channel = 0) :
+            Sieve(input.getClock(), std::move(input), channel)
         {
             
         }

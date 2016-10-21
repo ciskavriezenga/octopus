@@ -21,23 +21,32 @@ namespace octo
         Value(Clock& clock, const T& constant = {}) : Signal<T>(clock) { *this = constant; }
         
         //! Construct a value referencing another signal
-        Value(Signal<T>& reference) : Signal<T>(reference.getClock()) { *this = reference; }
+        Value(Clock& clock, Signal<T>& reference) : Signal<T>(clock) { *this = reference; }
+        
+        //! Construct a value referencing another signal
+        Value(Signal<T>& reference) : Value(reference.getClock(), reference) { }
+        
+        //! Reference another Value
+        /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
+        Value(Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Construct a value owning an internal signal
-        Value(Signal<T>&& internal) : Signal<T>(internal.getClock()) { *this = std::move(internal); }
+        Value(Clock& clock, Signal<T>&& internal) : Signal<T>(clock) { *this = std::move(internal); }
         
         //! Construct a value owning an internal signal
-        Value(std::unique_ptr<Signal<T>> internal) : Signal<T>(internal->getClock()) { *this = std::move(internal); }
+        Value(Signal<T>&& internal) : Value(internal.getClock(), std::move(internal)) { }
+        
+        //! Construct a value owning an internal signal
+        Value(Clock& clock, std::unique_ptr<Signal<T>> internal) : Signal<T>(clock) { *this = std::move(internal); }
+        
+        //! Construct a value owning an internal signal
+        Value(std::unique_ptr<Signal<T>> internal) : Value(internal->getClock(), std::move(internal)) { }
         
         //! Copying a Value is forbidden
         Value(const Value&) = delete;
         
         //! Moving from a value
         Value(Value&& rhs) : Signal<T>(rhs.getClock()) { *this = std::move(rhs); }
-        
-        //! Reference another Value
-        /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
-        Value(Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Destruct the value and release any contained data
         ~Value() { *this = T{}; }

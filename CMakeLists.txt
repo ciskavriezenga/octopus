@@ -18,6 +18,7 @@ set(HEADERS
     Join.hpp
     Negation.hpp
     Node.hpp
+    Patch.hpp
     Product.hpp
     Sieve.hpp
 	Signal.hpp
@@ -30,8 +31,10 @@ set(HEADERS
     Value.hpp)
 
 set(SOURCES
-	SignalBase.cpp)
+    Group.cpp
+    Patch.cpp)
 
 target_sources(octopus PRIVATE ${HEADERS} ${SOURCES})
 source_group(\\ FILES ${HEADERS} ${SOURCES})
-install (FILES ${HEADERS} DESTINATION include/octopus)
+install(TARGETS octopus DESTINATION lib)
+install(FILES ${HEADERS} DESTINATION include/octopus)

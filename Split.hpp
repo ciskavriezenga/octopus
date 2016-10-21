@@ -9,14 +9,14 @@
 #ifndef OCTOPUS_SPLIT_HPP
 #define OCTOPUS_SPLIT_HPP
 
-#include <vector>
-
 #include "Group.hpp"
 #include "Sieve.hpp"
 #include "Value.hpp"
 
 namespace octo
 {
+    class Clock;
+    
     //! Splits a multi-channel signal into multiple single-channel ones
     template <class T>
     class Split : public Group
@@ -24,44 +24,44 @@ namespace octo
     public:
         //! Construct the split
         /*! size The amount of sieves in the split */
-        Split(std::size_t size = 0)
+        Split(Clock& clock, std::size_t size = 0) :
+            input(clock)
         {
             resize(size);
         }
         
         //! Construct the split by providing size and input
-        Split(std::size_t size, Value<std::vector<T>> input) :
-            input(std::move(input))
+        Split(Clock& clock, Value<std::vector<T>> input, std::size_t size) :
+            input(clock, std::move(input))
         {
             resize(size);
+        }
+        
+        //! Construct the split by providing size and input
+        Split(Value<std::vector<T>> input, std::size_t size) :
+            Split(input.getClock(), std::move(input), size)
+        {
+            
         }
         
         //! Resize the number of sieves
         void resize(std::size_t size)
         {
-            auto oldSize = sieves.size();
-            sieves.resize(size);
+            // Store the current size for use during down-/upsizing
+            const auto oldSize = getOutputCount();
             
+            // Remove sieves if we're downsizing
+            for (auto i = size; i < oldSize; ++i)
+                removeOutput("channel" + std::to_string(i));
+            
+            // Add sieves if we're upsizing
             for (auto i = oldSize; i < size; ++i)
-            {
-                sieves[i].input = input;
-                sieves[i].channel = static_cast<unsigned int>(i);
-            }
+                addOutput<Sieve<T>>("channel" + std::to_string(i), input, i);
         }
-        
-        //! Return one of the output sieves
-        Sieve<T>& getOutput(std::size_t index) final override { return sieves.at(index); }
-        
-        //! Return the number of output sieves
-        std::size_t getOutputCount() const final override { return sieves.size(); }
         
     public:
         //! The input to the split
         Value<std::vector<T>> input;
-        
-    private:
-        //! The sieves that split the signal
-        std::vector<Sieve<T>> sieves;
     };
 }
 

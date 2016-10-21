@@ -20,11 +20,24 @@ namespace octo
     {
     public:
         //! Construct an empty unary operation
-        UnaryOperation() = default;
+        UnaryOperation(Clock& clock) :
+            Signal<Out>(clock),
+            input(clock)
+        {
+            
+        }
+        
+        //! Construct the unary operation with its input
+        UnaryOperation(Clock& clock, Value<In> input) :
+            Signal<Out>(clock),
+            input(std::move(input))
+        {
+            
+        }
         
         //! Construct the unary operation with its input
         UnaryOperation(Value<In> input) :
-            input(std::move(input))
+            UnaryOperation(input.getClock(), std::move(input))
         {
             
         }

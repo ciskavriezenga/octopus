@@ -22,7 +22,13 @@ namespace octo
     {
     public:
         //! Construct an empty binary operation
-        BinaryOperation(Clock& clock) : Signal<T>(clock) { }
+        BinaryOperation(Clock& clock) :
+            Signal<T>(clock),
+            lhs(clock),
+            rhs(clock)
+        {
+            
+        }
         
         //! Construct the binary operation with two terms and its own clock
         BinaryOperation(Clock& clock, Value<T> lhs, Value<T> rhs) :
