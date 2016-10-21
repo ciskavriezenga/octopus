@@ -26,7 +26,9 @@ namespace octo
     public:
         //! Construct a sum with a frequency of 0 and phase offset of 0
         Sine(Clock& clock) :
-            Signal<T>(clock)
+            Signal<T>(clock),
+            frequency(clock),
+            phaseOffset(clock)
         {
             
         }

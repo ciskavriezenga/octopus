@@ -56,8 +56,7 @@ namespace octo
         void removeOutput(const std::string& name);
         
     private:
-        //! Value signals as output to the group
-        /*! These are stored as SignalBase pointers, because they may differ in output type */
+        //! The output signals of the group (could be values, sieves in the case of a split, etc.)
         std::unordered_map<std::string, std::unique_ptr<SignalBase>> outputs;
     };
 }

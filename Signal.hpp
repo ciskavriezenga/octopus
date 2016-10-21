@@ -39,9 +39,9 @@ namespace octo
     public:
         //! Construct the signal
         Signal(Clock& clock) :
+            clock(&clock),
             cache(64),
-            timestamp(clock.now()),
-            clock(&clock)
+            timestamp(clock.now())
         {
             
         }
@@ -50,12 +50,13 @@ namespace octo
         virtual ~Signal() = default;
         
         //! Retrieve a signal of the sample, relative to the its clock's current timestamp
-        T operator[](int z)
+        /*! @return A reference to the generated sample in cache. Copy and be done with it, this could change with each new [] call */
+        const T& operator[](int z)
         {
-            // If a sample before the beginning of clock time is asked, return 0
+            // If a sample before the beginning of clock time is asked, return the first one ever
             const auto now = clock->now();
             if (now < -z)
-                return T{};
+                z = -now;
             
             // Generate new samples up to the requested one
             const auto requestedTimestamp = now + z;
