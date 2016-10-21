@@ -9,6 +9,9 @@
 #ifndef OCTOPUS_SPLIT_HPP
 #define OCTOPUS_SPLIT_HPP
 
+#include <memory>
+#include <vector>
+
 #include "Group.hpp"
 #include "Sieve.hpp"
 #include "Value.hpp"
@@ -54,14 +57,22 @@ namespace octo
             for (auto i = size; i < oldSize; ++i)
                 removeOutput("channel" + std::to_string(i));
             
+            sieves.resize(size);
+            
             // Add sieves if we're upsizing
             for (auto i = oldSize; i < size; ++i)
-                addOutput<Sieve<T>>("channel" + std::to_string(i), input, i);
+            {
+                sieves.emplace_back(std::make_unique<Sieve<T>>(input, i));
+                setOutput("channel" + std::to_string(i), *sieves[i]);
+            }
         }
         
     public:
         //! The input to the split
         Value<std::vector<T>> input;
+        
+        //! The sieves that make up this split
+        std::vector<std::unique_ptr<Sieve<T>>> sieves;
     };
 }
 

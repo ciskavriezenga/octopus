@@ -42,7 +42,8 @@ namespace octo
         template <class T>
         void addOutput(const std::string& name, Clock& clock)
         {
-            Group::addOutput<Value<T>>(name, clock);
+            outputValues.emplace(name, std::make_unique<Value<T>>(clock));
+            Group::setOutput(name, dynamic_cast<Value<T>&>(*outputValues[name]));
         }
         
         //! Change one of the outputs
@@ -51,7 +52,7 @@ namespace octo
         template <class T>
         void assignOutput(const std::string& output, const std::string& node)
         {
-            dynamic_cast<Value<T>&>(getOutput<T>(output)) = dynamic_cast<Signal<T>&>(getNode(node));
+            dynamic_cast<Value<T>&>(*outputValues[output]) = dynamic_cast<Signal<T>&>(getNode(node));
         }
         
         //! Change one of the outputs
@@ -60,7 +61,7 @@ namespace octo
         template <class T>
         void unassignOutput(const std::string& output)
         {
-            dynamic_cast<Value<T>&>(getOutput<T>(output)) = T{};
+            dynamic_cast<Value<T>&>(outputValues[output]) = T{};
         }
         
     private:

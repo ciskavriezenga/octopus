@@ -14,7 +14,7 @@ using namespace std;
 
 namespace octo
 {
-    SignalBase& Group::getOutput(const string& name)
+    const SignalBase& Group::getOutput(const string& name) const
     {
         auto it = outputs.find(name);
         if (it == outputs.end())
@@ -32,10 +32,9 @@ namespace octo
         return keys;
     }
     
-    void Group::addOutput(const string& name, unique_ptr<SignalBase> signal)
+    void Group::setOutput(const string& name, const SignalBase& signal)
     {
-        assert(signal != nullptr);
-        outputs.emplace(name, move(signal));
+        outputs[name] = &signal;
     }
     
     void Group::removeOutput(const string& name)
