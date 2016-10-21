@@ -51,12 +51,12 @@ namespace octo
         
         //! Retrieve a signal of the sample, relative to the its clock's current timestamp
         /*! @return A reference to the generated sample in cache. Copy and be done with it, this could change with each new [] call */
-        const T& operator[](int z)
+        const T& operator[](int z) const
         {
             // If a sample before the beginning of clock time is asked, return the first one ever
             const auto now = clock->now();
             if (now < -z)
-                z = -now;
+                z = -static_cast<int>(now);
             
             // Generate new samples up to the requested one
             const auto requestedTimestamp = now + z;
@@ -77,7 +77,7 @@ namespace octo
         }
         
         //! Return the current sample of the signal
-        explicit operator T() { return (*this)[0]; }
+        explicit operator T() const { return (*this)[0]; }
         
         //! Move this signal to the heap
         /*! Signals need to implement this to support in-place creation of signals in expressions.
@@ -89,20 +89,20 @@ namespace octo
         
     private:
         //! Generate a new sample
-        virtual void generateSample(T& out) = 0;
+        virtual void generateSample(T& out) const = 0;
         
     private:
         //! The clock this signal runs at
         Clock* clock = nullptr;
         
         //! A cache for previously generated samples
-        std::vector<T> cache;
+        mutable std::vector<T> cache;
         
         //! The read index of the cache
-        unsigned int cacheIndex = 0;
+        mutable unsigned int cacheIndex = 0;
         
         //! The timestamp of the next-to-be generated sample
-        uint64_t timestamp = 0;
+        mutable uint64_t timestamp = 0;
     };
     
     // Convenience macro for overriding Signal::move()

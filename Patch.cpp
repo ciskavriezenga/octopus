@@ -33,4 +33,13 @@ namespace octo
         
         return *it->second;
     }
+    
+    const Node& Patch::getNode(const string& name) const
+    {
+        auto it = nodes.find(name);
+        if (it == nodes.end())
+            throw runtime_error("no node with the name '" + name + "'");
+        
+        return *it->second;
+    }
 }
