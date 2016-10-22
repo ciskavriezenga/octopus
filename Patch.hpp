@@ -61,7 +61,7 @@ namespace octo
         template <class T>
         void unassignOutput(const std::string& output)
         {
-            dynamic_cast<Value<T>&>(outputValues[output]) = T{};
+            dynamic_cast<Value<T>&>(*outputValues[output]) = T{};
         }
         
     private:
