@@ -24,11 +24,11 @@ namespace octo
         Value(Clock& clock, Signal<T>& reference) : Signal<T>(clock) { *this = reference; }
         
         //! Construct a value referencing another signal
-        Value(Signal<T>& reference) : Value(reference.getClock(), reference) { }
+        Value(const Signal<T>& reference) : Value(reference.getClock(), reference) { }
         
-        //! Reference another Value
-        /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
-        Value(Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
+//        //! Reference another Value
+//        /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
+//        Value(const Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Construct a value owning an internal signal
         Value(Clock& clock, Signal<T>&& internal) : Signal<T>(clock) { *this = std::move(internal); }
@@ -64,12 +64,12 @@ namespace octo
         }
         
         //! Have the value reference another signal
-        Value& operator=(Signal<T>& reference)
+        Value& operator=(const Signal<T>& reference)
         {
             *this = T{};
             
             mode = ValueMode::REFERENCE;
-            new (&this->reference) Signal<T>*(&reference);
+            new (&this->reference) const Signal<T>*(&reference);
             
             return *this;
         }
@@ -117,9 +117,9 @@ namespace octo
             return *this;
         }
         
-        //! Reference another Value
-        /*! This overload is necessary, because otherwise the deleted copy assignment op is selected */
-        Value& operator=(Value& reference) { return *this = dynamic_cast<Signal<T>&>(reference); }
+//        //! Reference another Value
+//        /*! This overload is necessary, because otherwise the deleted copy assignment op is selected */
+//        Value& operator=(Value& reference) { return *this = dynamic_cast<Signal<T>&>(reference); }
         
         //! Is this value a constant?
         bool isConstant() const noexcept { return mode == ValueMode::CONSTANT; }
@@ -177,7 +177,7 @@ namespace octo
             T constant;
             
             //! Holds non-owned signal pointer if mode == ValueMode::NON_OWNED
-            Signal<T>* reference;
+            const Signal<T>* reference;
             
             //! Holds owned signal unique_ptr if mode == ValueMode::OWNED
             std::unique_ptr<Signal<T>> internal;
