@@ -52,7 +52,7 @@ namespace octo
         unit::discrete<uint64_t> tick() final override
         {
             auto now = std::chrono::high_resolution_clock::now();
-            rate = std::chrono::duration_cast<std::chrono::duration<double>>(lastNow - now).count();
+            rate = 1.0 / std::chrono::duration_cast<std::chrono::duration<double>>(lastNow - now).count();
             lastNow = now;
             
             return ++timestamp;
