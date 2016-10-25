@@ -20,24 +20,7 @@ namespace octo
     class Product : public Fold<T>
     {
     public:
-        //! Construct an empty product
-        Product(Clock& clock) : Fold<T>(clock) { }
-        
-        //! Construct a product with two factors and a clock
-        Product(Clock& clock, Value<T> lhs, Value<T> rhs) :
-            Fold<T>(clock)
-        {
-            this->emplace(std::move(lhs));
-            this->emplace(std::move(rhs));
-        }
-        
-        //! Construct a product with two factors
-        Product(Value<T> lhs, Value<T> rhs) :
-            Product(lhs.getClock(), std::move(lhs), std::move(rhs))
-        {
-            if (&lhs.getClock() != &rhs.getClock())
-                throw std::runtime_error("clocks of lhs and rhs of multiplication don't match");
-        }
+        using Fold<T>::Fold;
         
         //! Add another term to the product
         template <class U>

@@ -51,7 +51,7 @@ namespace octo
         
     private:
         //! Generated the sifted ouf signal
-        void generateSample(T& out) final override
+        void generateSample(T& out) const final override
         {
             const auto& x = this->input[0];
             out = channel < x.size() ? x[channel] : T{};

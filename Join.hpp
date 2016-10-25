@@ -20,24 +20,7 @@ namespace octo
     class Join : public Fold<T, std::vector<T>>
     {
     public:        
-        //! Construct an empty join
-        Join(Clock& clock) : Fold<T, std::vector<T>>(clock) { }
-        
-        //! Construct a join with two channels
-        Join(Clock& clock, Value<T> lhs, Value<T> rhs) :
-            Fold<T, std::vector<T>>(clock)
-        {
-            this->emplace(std::move(lhs));
-            this->emplace(std::move(rhs));
-        }
-        
-        //! Construct a join with two channels
-        Join(Value<T> lhs, Value<T> rhs) :
-            Join(lhs.getClock(), std::move(lhs), std::move(rhs))
-        {
-            if (&lhs.getClock() != &rhs.getClock())
-                throw std::runtime_error("clocks of lhs and rhs of join don't match");
-        }
+        using Fold<T, std::vector<T>>::Fold;
         
         // Generate the move function
         GENERATE_MOVE(Join)
