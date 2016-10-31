@@ -14,7 +14,7 @@ namespace octo
         
     public:
         //! The dependencies of this node
-        std::set<Node*> dependencies;
+        mutable std::set<Node*> dependencies;
         
     private:
         //! Notify dependencies this node will be destructed

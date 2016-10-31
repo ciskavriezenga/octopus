@@ -188,7 +188,7 @@ namespace octo
         }
         
         //! Reset the value, because the referenced signal will be destructed
-        void dependentWillBeDestructed(Node& dependent)
+        void dependentWillBeDestructed(Node& dependent) final override
         {
             assert(reference == &dependent);
             reset();
