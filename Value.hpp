@@ -18,10 +18,10 @@ namespace octo
     {
     public:
         //! Construct a value with constant value
-        Value(Clock& clock, const T& constant = {}) : Signal<T>(clock) { *this = constant; }
+        Value(Clock& clock, const T& constant = {}) : Signal<T>(clock), mode(ValueMode::CONSTANT), constant(constant) { }
         
         //! Construct a value referencing another signal
-        Value(Clock& clock, Signal<T>& reference) : Signal<T>(clock) { *this = reference; }
+        Value(Clock& clock, Signal<T>& reference) : Signal<T>(clock), mode(ValueMode::REFERENCE), reference(&reference) { }
         
         //! Construct a value referencing another signal
         Value(const Signal<T>& reference) : Value(reference.getClock(), reference) { }
@@ -31,13 +31,13 @@ namespace octo
 //        Value(const Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Construct a value owning an internal signal
-        Value(Clock& clock, Signal<T>&& internal) : Signal<T>(clock) { *this = std::move(internal); }
+        Value(Clock& clock, Signal<T>&& internal) : Signal<T>(clock), mode(ValueMode::INTERNAL), internal(std::move(internal).moveToHeap()) { }
         
         //! Construct a value owning an internal signal
         Value(Signal<T>&& internal) : Value(internal.getClock(), std::move(internal)) { }
         
         //! Construct a value owning an internal signal
-        Value(Clock& clock, std::unique_ptr<Signal<T>> internal) : Signal<T>(clock) { *this = std::move(internal); }
+        Value(Clock& clock, std::unique_ptr<Signal<T>> internal) : Signal<T>(clock), mode(ValueMode::INTERNAL), internal(std::move(internal)) { }
         
         //! Construct a value owning an internal signal
         Value(std::unique_ptr<Signal<T>> internal) : Value(internal->getClock(), std::move(internal)) { }
@@ -46,7 +46,34 @@ namespace octo
         Value(const Value&) = delete;
         
         //! Moving from a value
-        Value(Value&& rhs) : Signal<T>(rhs.getClock()) { *this = std::move(rhs); }
+        Value(Value&& rhs) : Signal<T>(rhs.getClock())
+        {
+            if (&rhs == this)
+                return;
+            
+            if (mode != rhs.mode ||
+                (isConstant() && constant != rhs.constant) ||
+                (isReference() && reference != rhs.reference))
+            {
+                switch ((mode = rhs.mode))
+                {
+                    case ValueMode::CONSTANT:
+                        new (&constant) T(rhs.constant);
+                        onConstantSet(constant);
+                        break;
+                    case ValueMode::REFERENCE:
+                        reference = rhs.reference;
+                        onSignalSet(*reference);
+                        break;
+                    case ValueMode::INTERNAL:
+                        new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
+                        onSignalSet(*internal);
+                        break;
+                }
+            }
+            
+            rhs.reset();
+        }
         
         //! Destruct the value and release any contained data
         ~Value() { reset(); }
@@ -73,14 +100,16 @@ namespace octo
         {
             if (isReference() && this->reference == &reference)
                 return *this;
-                
+            
             deconstruct();
             
             mode = ValueMode::REFERENCE;
             new (&this->reference) const Signal<T>*(&reference);
             
             reference.dependencies.emplace(this);
-            onSignalSet(*this->reference);
+            
+            if (onSignalSet)
+                onSignalSet(*this->reference);
             
             return *this;
         }
@@ -102,7 +131,8 @@ namespace octo
             mode = ValueMode::INTERNAL;
             new (&this->internal) std::unique_ptr<Signal<T>>(std::move(internal));
             
-            onSignalSet(*this->internal);
+            if (onSignalSet)
+                onSignalSet(*this->internal);
             
             return *this;
         }
@@ -125,15 +155,18 @@ namespace octo
                 {
                     case ValueMode::CONSTANT:
                         new (&constant) T(rhs.constant);
-                        onConstantSet(constant);
+                        if (onConstantSet)
+                            onConstantSet(constant);
                         break;
                     case ValueMode::REFERENCE:
                         reference = rhs.reference;
-                        onSignalSet(*reference);
+                        if (onSignalSet)
+                            onSignalSet(*reference);
                         break;
                     case ValueMode::INTERNAL:
                         new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
-                        onSignalSet(*internal);
+                        if (onSignalSet)
+                            onSignalSet(*internal);
                         break;
                 }
             }
