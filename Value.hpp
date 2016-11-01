@@ -80,7 +80,7 @@ namespace octo
             new (&this->reference) const Signal<T>*(&reference);
             
             reference.dependencies.emplace(this);
-            onSignalSet(*reference);
+            onSignalSet(*this->reference);
             
             return *this;
         }
@@ -150,7 +150,7 @@ namespace octo
         //! Reset a signal to its unconnected state
         void reset()
         {
-            set(T{});
+            *this = T{};
         }
         
         //! Is this value a constant?
@@ -188,7 +188,7 @@ namespace octo
         
     public:
         std::function<void(const T&)> onConstantSet; //!< Called when the value is assigned a new constant
-        std::function<void(Signal<T>&)> onSignalSet; //!< Called when the value is assigned a new signal
+        std::function<void(const Signal<T>&)> onSignalSet; //!< Called when the value is assigned a new signal
         
     private:
         void deconstruct()
