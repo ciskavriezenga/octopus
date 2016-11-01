@@ -54,10 +54,16 @@ namespace octo
         //! Assign a new constant to the value
         Value& operator=(const T& constant)
         {
-            reset();
+            if (isConstant() && this->constant == constant)
+                return *this;
+            
+            deconstruct();
             
             mode = ValueMode::CONSTANT;
             new (&this->constant) T(constant);
+            
+            if (onConstantSet)
+                onConstantSet(constant);
             
             return *this;
         }
@@ -65,12 +71,16 @@ namespace octo
         //! Have the value reference another signal
         Value& operator=(const Signal<T>& reference)
         {
-            reset();
+            if (isReference() && this->reference == &reference)
+                return *this;
+                
+            deconstruct();
             
             mode = ValueMode::REFERENCE;
             new (&this->reference) const Signal<T>*(&reference);
             
             reference.dependencies.emplace(this);
+            onSignalSet(*reference);
             
             return *this;
         }
@@ -87,10 +97,12 @@ namespace octo
             if (!internal)
                 throw std::invalid_argument("nullptr given to Value");
             
-            reset();
+            deconstruct();
             
             mode = ValueMode::INTERNAL;
             new (&this->internal) std::unique_ptr<Signal<T>>(std::move(internal));
+            
+            onSignalSet(*this->internal);
             
             return *this;
         }
@@ -104,19 +116,26 @@ namespace octo
             if (&rhs == this)
                 return *this;
             
-            reset();
-            
-            switch ((mode = rhs.mode))
+            if (mode != rhs.mode ||
+                (isConstant() && constant != rhs.constant) ||
+                (isReference() && reference != rhs.reference))
             {
-                case ValueMode::CONSTANT:
-                    constant = rhs.constant;
-                    break;
-                case ValueMode::REFERENCE:
-                    reference = rhs.reference;
-                    break;
-                case ValueMode::INTERNAL:
-                    new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
-                    break;
+                deconstruct();
+                switch ((mode = rhs.mode))
+                {
+                    case ValueMode::CONSTANT:
+                        new (&constant) T(rhs.constant);
+                        onConstantSet(constant);
+                        break;
+                    case ValueMode::REFERENCE:
+                        reference = rhs.reference;
+                        onSignalSet(*reference);
+                        break;
+                    case ValueMode::INTERNAL:
+                        new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
+                        onSignalSet(*internal);
+                        break;
+                }
             }
             
             rhs.reset();
@@ -131,15 +150,7 @@ namespace octo
         //! Reset a signal to its unconnected state
         void reset()
         {
-            switch (mode)
-            {
-                case ValueMode::CONSTANT: break;
-                case ValueMode::REFERENCE: reference->dependencies.erase(this); break;
-                case ValueMode::INTERNAL: internal.~unique_ptr<Signal<T>>(); break;
-            }
-            
-            mode = ValueMode::CONSTANT;
-            constant = T{};
+            set(T{});
         }
         
         //! Is this value a constant?
@@ -175,7 +186,28 @@ namespace octo
         
         GENERATE_MOVE(Value)
         
+    public:
+        std::function<void(const T&)> onConstantSet; //!< Called when the value is assigned a new constant
+        std::function<void(Signal<T>&)> onSignalSet; //!< Called when the value is assigned a new signal
+        
     private:
+        void deconstruct()
+        {
+            switch (mode)
+            {
+                case ValueMode::CONSTANT:
+                    constant.~T();
+                    break;
+                case ValueMode::REFERENCE:
+                    reference->dependencies.erase(this);
+                    reference = nullptr;
+                    break;
+                case ValueMode::INTERNAL:
+                    internal.~unique_ptr<Signal<T>>();
+                    break;
+            }
+        }
+        
         //! Generate a new sample
         void generateSample(T& out) const final override
         {
