@@ -2,6 +2,7 @@
 #define OCTOPUS_SIGNAL_HPP
 
 #include <dsperados/math/utility.hpp>
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
