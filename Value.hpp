@@ -203,7 +203,7 @@ namespace octo
                     reference = nullptr;
                     break;
                 case ValueMode::INTERNAL:
-                    internal.~unique_ptr<Signal<T>>();
+                    internal.~unique_ptr();
                     break;
             }
         }
