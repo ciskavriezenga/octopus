@@ -24,7 +24,7 @@ namespace octo
         Value(Clock& clock, Signal<T>& reference) : Signal<T>(clock), mode(ValueMode::REFERENCE), reference(&reference) { }
         
         //! Construct a value referencing another signal
-        Value(const Signal<T>& reference) : Value(reference.getClock(), reference) { }
+        Value(Signal<T>& reference) : Value(reference.getClock(), reference) { }
         
 //        //! Reference another Value
 //        /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
@@ -96,7 +96,7 @@ namespace octo
         }
         
         //! Have the value reference another signal
-        Value& operator=(const Signal<T>& reference)
+        Value& operator=(Signal<T>& reference)
         {
             if (isReference() && this->reference == &reference)
                 return *this;
@@ -104,7 +104,7 @@ namespace octo
             deconstruct();
             
             mode = ValueMode::REFERENCE;
-            new (&this->reference) const Signal<T>*(&reference);
+            new (&this->reference) Signal<T>*(&reference);
             
             reference.dependencies.emplace(this);
             
@@ -207,7 +207,7 @@ namespace octo
         
         //! Return a reference to the contained/referenced signal
         /*! @throw std::runtime_error if the value is a constant */
-        const Signal<T>& getReference() const
+        Signal<T>& getReference() const
         {
             switch (mode)
             {
@@ -221,7 +221,7 @@ namespace octo
         
     public:
         std::function<void(const T&)> onConstantSet; //!< Called when the value is assigned a new constant
-        std::function<void(const Signal<T>&)> onSignalSet; //!< Called when the value is assigned a new signal
+        std::function<void(Signal<T>&)> onSignalSet; //!< Called when the value is assigned a new signal
         
     private:
         void deconstruct()
@@ -270,7 +270,7 @@ namespace octo
             T constant;
             
             //! Holds non-owned signal pointer if mode == ValueMode::NON_OWNED
-            const Signal<T>* reference;
+            Signal<T>* reference;
             
             //! Holds owned signal unique_ptr if mode == ValueMode::OWNED
             std::unique_ptr<Signal<T>> internal;
