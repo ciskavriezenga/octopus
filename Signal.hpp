@@ -93,7 +93,7 @@ namespace octo
         
     private:
         //! Generate a new sample
-        virtual void generateSample(T& out) const = 0;
+        virtual void generateSample(T& out) = 0;
         
     private:
         //! The clock this signal runs at

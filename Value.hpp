@@ -242,7 +242,7 @@ namespace octo
         }
         
         //! Generate a new sample
-        void generateSample(T& out) const final override
+        void generateSample(T& out) final override
         {
             switch (mode)
             {
