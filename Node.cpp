@@ -6,18 +6,4 @@
 //
 //
 
-#include <cassert>
-
 #include "Node.hpp"
-
-namespace octo
-{
-    Node::~Node()
-    {
-        auto temp = dependencies;
-        for (auto& dependency : temp)
-            dependency->dependentWillBeDestructed(*this);
-        
-        assert(dependencies.empty());
-    }
-}
