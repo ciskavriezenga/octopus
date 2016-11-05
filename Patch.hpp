@@ -43,7 +43,7 @@ namespace octo
         void addOutput(const std::string& name, Clock& clock)
         {
             outputValues.emplace(name, std::make_unique<Value<T>>(clock));
-            Group::setOutput(name, dynamic_cast<Value<T>&>(*outputValues[name]));
+            Group::addOutput(name, dynamic_cast<Value<T>&>(*outputValues[name]));
         }
         
         //! Change one of the outputs

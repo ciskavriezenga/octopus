@@ -28,11 +28,11 @@ namespace octo
         virtual ~Group() = default;
         
         //! Retrieve one of the outputs as a typeless signal base
-        const SignalBase& getOutput(const std::string& name) const;
+        SignalBase& getOutput(const std::string& name);
         
         //! Retrieve one of the outputs as a typed signal
         template <class T>
-        const Signal<T>& getOutput(const std::string& name) const { return dynamic_cast<const Signal<T>&>(getOutput(name)); }
+        Signal<T>& getOutput(const std::string& name) { return dynamic_cast<Signal<T>&>(getOutput(name)); }
         
         //! Retrieve the number of outputs
         std::size_t getOutputCount() const { return outputs.size(); }
@@ -43,14 +43,14 @@ namespace octo
         
     protected:
         //! Add a new output
-        void setOutput(const std::string& name, const SignalBase& signal);
+        void addOutput(const std::string& name, SignalBase& signal);
         
         //! Remove one of the outputs
         void removeOutput(const std::string& name);
         
     private:
         //! The output signals of the group (could be values, sieves in the case of a split, etc.)
-        std::unordered_map<std::string, const SignalBase*> outputs;
+        std::unordered_map<std::string, SignalBase*> outputs;
     };
 }
 
