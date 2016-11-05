@@ -6,12 +6,10 @@
 #include <typeinfo>
 #include <unit/discrete.hpp>
 
-#include "Node.hpp"
-
 namespace octo
 {
     //! Base class for all signals in Octopus, regardless of their output type
-    class SignalBase : public Node
+    class SignalBase
     {
     public:
         //! Virtual destructor, because this is a polymorphic base class

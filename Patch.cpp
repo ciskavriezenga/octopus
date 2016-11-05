@@ -15,9 +15,9 @@ using namespace std;
 
 namespace octo
 {
-    void Patch::addNode(const string& name, Node& node)
+    void Patch::addNode(const string& name, Node node)
     {
-        nodes.emplace(name, &node);
+        nodes.emplace(name, node);
     }
     
     void Patch::removeNode(const string& name)
@@ -25,21 +25,12 @@ namespace octo
         nodes.erase(name);
     }
     
-    Node& Patch::getNode(const string& name)
+    Node Patch::getNode(const string& name) const
     {
         auto it = nodes.find(name);
         if (it == nodes.end())
             throw runtime_error("no node with the name '" + name + "'");
         
-        return *it->second;
-    }
-    
-    const Node& Patch::getNode(const string& name) const
-    {
-        auto it = nodes.find(name);
-        if (it == nodes.end())
-            throw runtime_error("no node with the name '" + name + "'");
-        
-        return *it->second;
+        return it->second;
     }
 }
