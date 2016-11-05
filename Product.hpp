@@ -35,7 +35,7 @@ namespace octo
     private:
         // Inherited from Fold
         T init() const final override { return 1; }
-        T fold(const T& in, const T& out) const final override { return in * out; }
+        T fold(const T& in, const T& out) final override { return in * out; }
     };
     
     //! Combine a scalar and a signal into a product

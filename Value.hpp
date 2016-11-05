@@ -18,26 +18,26 @@ namespace octo
     {
     public:
         //! Construct a value with constant value
-        Value(Clock& clock, const T& constant = {}) : Signal<T>(clock) { *this = constant; }
+        Value(Clock& clock, const T& constant = {}) : Signal<T>(clock), mode(ValueMode::CONSTANT), constant(constant) { }
         
         //! Construct a value referencing another signal
-        Value(Clock& clock, Signal<T>& reference) : Signal<T>(clock) { *this = reference; }
+        Value(Clock& clock, Signal<T>& reference) : Signal<T>(clock), mode(ValueMode::REFERENCE), reference(&reference) { }
         
         //! Construct a value referencing another signal
-        Value(const Signal<T>& reference) : Value(reference.getClock(), reference) { }
+        Value(Signal<T>& reference) : Value(reference.getClock(), reference) { }
         
 //        //! Reference another Value
 //        /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
 //        Value(const Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Construct a value owning an internal signal
-        Value(Clock& clock, Signal<T>&& internal) : Signal<T>(clock) { *this = std::move(internal); }
+        Value(Clock& clock, Signal<T>&& internal) : Signal<T>(clock), mode(ValueMode::INTERNAL), internal(std::move(internal).moveToHeap()) { }
         
         //! Construct a value owning an internal signal
         Value(Signal<T>&& internal) : Value(internal.getClock(), std::move(internal)) { }
         
         //! Construct a value owning an internal signal
-        Value(Clock& clock, std::unique_ptr<Signal<T>> internal) : Signal<T>(clock) { *this = std::move(internal); }
+        Value(Clock& clock, std::unique_ptr<Signal<T>> internal) : Signal<T>(clock), mode(ValueMode::INTERNAL), internal(std::move(internal)) { }
         
         //! Construct a value owning an internal signal
         Value(std::unique_ptr<Signal<T>> internal) : Value(internal->getClock(), std::move(internal)) { }
@@ -46,30 +46,70 @@ namespace octo
         Value(const Value&) = delete;
         
         //! Moving from a value
-        Value(Value&& rhs) : Signal<T>(rhs.getClock()) { *this = std::move(rhs); }
+        Value(Value&& rhs) : Signal<T>(rhs.getClock())
+        {
+            if (&rhs == this)
+                return;
+            
+            if (mode != rhs.mode ||
+                (isConstant() && constant != rhs.constant) ||
+                (isReference() && reference != rhs.reference))
+            {
+                switch ((mode = rhs.mode))
+                {
+                    case ValueMode::CONSTANT:
+                        new (&constant) T(rhs.constant);
+                        onConstantSet(constant);
+                        break;
+                    case ValueMode::REFERENCE:
+                        reference = rhs.reference;
+                        onSignalSet(*reference);
+                        break;
+                    case ValueMode::INTERNAL:
+                        new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
+                        onSignalSet(*internal);
+                        break;
+                }
+            }
+            
+            rhs.reset();
+        }
         
         //! Destruct the value and release any contained data
-        ~Value() { *this = T{}; }
+        ~Value() { reset(); }
         
         //! Assign a new constant to the value
         Value& operator=(const T& constant)
         {
-            if (mode == ValueMode::INTERNAL)
-                internal.~unique_ptr<Signal<T>>();
+            if (isConstant() && this->constant == constant)
+                return *this;
+            
+            deconstruct();
             
             mode = ValueMode::CONSTANT;
             new (&this->constant) T(constant);
+            
+            if (onConstantSet)
+                onConstantSet(constant);
             
             return *this;
         }
         
         //! Have the value reference another signal
-        Value& operator=(const Signal<T>& reference)
+        Value& operator=(Signal<T>& reference)
         {
-            *this = T{};
+            if (isReference() && this->reference == &reference)
+                return *this;
+            
+            deconstruct();
             
             mode = ValueMode::REFERENCE;
-            new (&this->reference) const Signal<T>*(&reference);
+            new (&this->reference) Signal<T>*(&reference);
+            
+            reference.dependencies.emplace(this);
+            
+            if (onSignalSet)
+                onSignalSet(*this->reference);
             
             return *this;
         }
@@ -86,10 +126,13 @@ namespace octo
             if (!internal)
                 throw std::invalid_argument("nullptr given to Value");
             
-            *this = T{};
+            deconstruct();
             
             mode = ValueMode::INTERNAL;
             new (&this->internal) std::unique_ptr<Signal<T>>(std::move(internal));
+            
+            if (onSignalSet)
+                onSignalSet(*this->internal);
             
             return *this;
         }
@@ -103,16 +146,32 @@ namespace octo
             if (&rhs == this)
                 return *this;
             
-            *this = T{};
-            
-            switch ((mode = rhs.mode))
+            if (mode != rhs.mode ||
+                (isConstant() && constant != rhs.constant) ||
+                (isReference() && reference != rhs.reference))
             {
-                case ValueMode::CONSTANT: constant = rhs.constant; break;
-                case ValueMode::REFERENCE: reference = rhs.reference; break;
-                case ValueMode::INTERNAL: new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal)); break;
+                deconstruct();
+                switch ((mode = rhs.mode))
+                {
+                    case ValueMode::CONSTANT:
+                        new (&constant) T(rhs.constant);
+                        if (onConstantSet)
+                            onConstantSet(constant);
+                        break;
+                    case ValueMode::REFERENCE:
+                        reference = rhs.reference;
+                        if (onSignalSet)
+                            onSignalSet(*reference);
+                        break;
+                    case ValueMode::INTERNAL:
+                        new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
+                        if (onSignalSet)
+                            onSignalSet(*internal);
+                        break;
+                }
             }
             
-            rhs = T{};
+            rhs.reset();
             
             return *this;
         }
@@ -120,6 +179,12 @@ namespace octo
 //        //! Reference another Value
 //        /*! This overload is necessary, because otherwise the deleted copy assignment op is selected */
 //        Value& operator=(Value& reference) { return *this = dynamic_cast<Signal<T>&>(reference); }
+        
+        //! Reset a signal to its unconnected state
+        void reset()
+        {
+            *this = T{};
+        }
         
         //! Is this value a constant?
         bool isConstant() const noexcept { return mode == ValueMode::CONSTANT; }
@@ -142,7 +207,7 @@ namespace octo
         
         //! Return a reference to the contained/referenced signal
         /*! @throw std::runtime_error if the value is a constant */
-        const Signal<T>& getReference() const
+        Signal<T>& getReference() const
         {
             switch (mode)
             {
@@ -154,9 +219,30 @@ namespace octo
         
         GENERATE_MOVE(Value)
         
+    public:
+        std::function<void(const T&)> onConstantSet; //!< Called when the value is assigned a new constant
+        std::function<void(Signal<T>&)> onSignalSet; //!< Called when the value is assigned a new signal
+        
     private:
+        void deconstruct()
+        {
+            switch (mode)
+            {
+                case ValueMode::CONSTANT:
+                    constant.~T();
+                    break;
+                case ValueMode::REFERENCE:
+                    reference->dependencies.erase(this);
+                    reference = nullptr;
+                    break;
+                case ValueMode::INTERNAL:
+                    internal.~unique_ptr();
+                    break;
+            }
+        }
+        
         //! Generate a new sample
-        void generateSample(T& out) const final override
+        void generateSample(T& out) final override
         {
             switch (mode)
             {
@@ -164,6 +250,13 @@ namespace octo
                 case ValueMode::REFERENCE: out = (*reference)[0]; break;
                 case ValueMode::INTERNAL: out = (*internal)[0]; break;
             }
+        }
+        
+        //! Reset the value, because the referenced signal will be destructed
+        void dependentWillBeDestructed(Node& dependent) final override
+        {
+            assert(reference == &dependent);
+            reset();
         }
         
     private:
@@ -177,7 +270,7 @@ namespace octo
             T constant;
             
             //! Holds non-owned signal pointer if mode == ValueMode::NON_OWNED
-            const Signal<T>* reference;
+            Signal<T>* reference;
             
             //! Holds owned signal unique_ptr if mode == ValueMode::OWNED
             std::unique_ptr<Signal<T>> internal;

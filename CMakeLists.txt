@@ -32,6 +32,7 @@ set(HEADERS
 
 set(SOURCES
     Group.cpp
+    Node.cpp
     Patch.cpp)
 
 target_sources(octopus PRIVATE ${HEADERS} ${SOURCES})

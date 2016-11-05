@@ -2,6 +2,7 @@
 #define OCTOPUS_SIGNAL_HPP
 
 #include <dsperados/math/utility.hpp>
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -51,7 +52,7 @@ namespace octo
         
         //! Retrieve a signal of the sample, relative to the its clock's current timestamp
         /*! @return A reference to the generated sample in cache. Copy and be done with it, this could change with each new [] call */
-        const T& operator[](int z) const
+        const T& operator[](int z)
         {
             // If a sample before the beginning of clock time is asked, return the first one ever
             const auto now = clock->now();
@@ -92,20 +93,20 @@ namespace octo
         
     private:
         //! Generate a new sample
-        virtual void generateSample(T& out) const = 0;
+        virtual void generateSample(T& out) = 0;
         
     private:
         //! The clock this signal runs at
         Clock* clock = nullptr;
         
         //! A cache for previously generated samples
-        mutable std::vector<T> cache;
+        std::vector<T> cache;
         
         //! The read index of the cache
-        mutable unsigned int cacheIndex = 0;
+        unsigned int cacheIndex = 0;
         
         //! The timestamp of the next-to-be generated sample
-        mutable uint64_t timestamp = 0;
+        uint64_t timestamp = 0;
     };
     
     // Convenience macro for overriding Signal::move()

@@ -69,7 +69,7 @@ namespace octo
         
     private:
         //! Generate a new sample
-        void generateSample(Out& out) const final override
+        void generateSample(Out& out) final override
         {
             if (inputs.empty())
                 out = {};
