@@ -26,9 +26,9 @@ namespace octo
         //! Construct a value referencing another signal
         Value(Signal<T>& reference) : Value(reference.getClock(), reference) { }
         
-//        //! Reference another Value
-//        /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
-//        Value(const Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
+        //! Reference another Value
+        /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
+        Value(Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Construct a value owning an internal signal
         Value(Clock& clock, Signal<T>&& internal) : Signal<T>(clock), mode(ValueMode::INTERNAL), internal(std::move(internal).moveToHeap()) { }
@@ -179,9 +179,9 @@ namespace octo
             return *this;
         }
         
-//        //! Reference another Value
-//        /*! This overload is necessary, because otherwise the deleted copy assignment op is selected */
-//        Value& operator=(Value& reference) { return *this = dynamic_cast<Signal<T>&>(reference); }
+        //! Reference another Value
+        /*! This overload is necessary, because otherwise the deleted copy assignment op is selected */
+        Value& operator=(Value& reference) { return *this = dynamic_cast<Signal<T>&>(reference); }
         
         //! Reset a signal to its unconnected state
         void reset()
