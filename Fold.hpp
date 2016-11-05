@@ -36,7 +36,8 @@ namespace octo
         }
         
         //! Construct a sum with two terms
-        Fold(Value<In> lhs, Value<In> rhs)
+        Fold(Value<In> lhs, Value<In> rhs) :
+            Signal<Out>(lhs.getClock())
         {
             if (&lhs.getClock() != &rhs.getClock())
                 throw std::runtime_error("clocks of lhs and rhs of fold don't match");

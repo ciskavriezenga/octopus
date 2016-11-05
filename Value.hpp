@@ -59,15 +59,18 @@ namespace octo
                 {
                     case ValueMode::CONSTANT:
                         new (&constant) T(rhs.constant);
-                        onConstantSet(constant);
+                        if (onConstantSet)
+                            onConstantSet(constant);
                         break;
                     case ValueMode::REFERENCE:
                         reference = rhs.reference;
-                        onSignalSet(*reference);
+                        if (onSignalSet)
+                            onSignalSet(*reference);
                         break;
                     case ValueMode::INTERNAL:
                         new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
-                        onSignalSet(*internal);
+                        if (onSignalSet)
+                            onSignalSet(*internal);
                         break;
                 }
             }
