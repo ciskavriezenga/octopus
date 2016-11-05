@@ -27,7 +27,7 @@ namespace octo
     {
     public:
         //! Add a new node into the patch
-        void addNode(const std::string& name, std::unique_ptr<Node> node);
+        void addNode(const std::string& name, Node& node);
         
         //! Remove a node from the patch
         void removeNode(const std::string& name);
@@ -66,7 +66,7 @@ namespace octo
         
     private:
         //! The nodes in the patch
-        std::unordered_map<std::string, std::unique_ptr<Node>> nodes;
+        std::unordered_map<std::string, Node*> nodes;
         
         //! These values (as polymorphic signal bases) will be used when one of the outputs is being unassigned
         std::unordered_map<std::string, std::unique_ptr<SignalBase>> outputValues;

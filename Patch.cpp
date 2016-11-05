@@ -15,9 +15,9 @@ using namespace std;
 
 namespace octo
 {
-    void Patch::addNode(const string& name, unique_ptr<Node> node)
+    void Patch::addNode(const string& name, Node& node)
     {
-        nodes.emplace(name, move(node));
+        nodes.emplace(name, &node);
     }
     
     void Patch::removeNode(const string& name)
