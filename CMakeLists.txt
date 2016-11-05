@@ -33,7 +33,8 @@ set(HEADERS
 set(SOURCES
     Group.cpp
     Node.cpp
-    Patch.cpp)
+    Patch.cpp
+    SignalBase.cpp)
 
 target_sources(octopus PRIVATE ${HEADERS} ${SOURCES})
 source_group(\\ FILES ${HEADERS} ${SOURCES})

@@ -14,14 +14,13 @@
 #include <string>
 #include <unordered_map>
 
-#include "Node.hpp"
 #include "SignalBase.hpp"
 #include "Signal.hpp"
 
 namespace octo
 {
     //! Multiple signals in one monolith object
-    class Group : public Node
+    class Group
     {
     public:
         //! Virtual, because this is a polymorphic base class
