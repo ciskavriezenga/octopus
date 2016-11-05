@@ -40,15 +40,15 @@ namespace octo
     
     //! Combine a scalar and a signal into a product
     template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T1, T2>::value, Product<T2>> operator*(const T1& lhs, Signal<T2>& rhs) { return {lhs, rhs}; }
+    std::enable_if_t<std::is_convertible<T1, T2>::value, Product<T2>> operator*(const T1& lhs, Signal<T2>& rhs) { return {Value<T1>(rhs.getClock(), lhs), rhs}; }
     
     //! Combine a scalar and a signal into a product
     template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T1, T2>::value, Product<T2>> operator*(const T1& lhs, Signal<T2>&& rhs) { return {lhs, std::move(rhs).moveToHeap()}; }
+    std::enable_if_t<std::is_convertible<T1, T2>::value, Product<T2>> operator*(const T1& lhs, Signal<T2>&& rhs) { return {Value<T1>(rhs.getClock(), lhs), std::move(rhs).moveToHeap()}; }
     
     //! Combine a scalar and a signal into a product
     template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T2, T1>::value, Product<T1>> operator*(Signal<T1>& lhs, const T2& rhs) { return {lhs, rhs}; }
+    std::enable_if_t<std::is_convertible<T2, T1>::value, Product<T1>> operator*(Signal<T1>& lhs, const T2& rhs) { return {lhs, Value<T2>(lhs.getClock(), rhs)}; }
     
     //! Combine two signals into a product
     template <class T1, class T2>
@@ -60,7 +60,7 @@ namespace octo
     
     //! Combine a scalar and a signal into a product
     template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T2, T1>::value, Product<T1>> operator*(Signal<T1>&& lhs, const T2& rhs) { return {std::move(lhs).moveToHeap(), rhs}; }
+    std::enable_if_t<std::is_convertible<T2, T1>::value, Product<T1>> operator*(Signal<T1>&& lhs, const T2& rhs) { return {std::move(lhs).moveToHeap(), Value<T2>(lhs.getClock(), rhs)}; }
     
     //! Combine two signals into a product
     template <class T1, class T2>
