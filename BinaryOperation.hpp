@@ -24,45 +24,45 @@ namespace octo
         //! Construct an empty binary operation
         BinaryOperation(Clock& clock) :
             Signal<T>(clock),
-            lhs(clock),
-            rhs(clock)
+            left(clock),
+            right(clock)
         {
             
         }
         
         //! Construct the binary operation with two terms and its own clock
-        BinaryOperation(Clock& clock, Value<T> lhs, Value<T> rhs) :
+        BinaryOperation(Clock& clock, Value<T> left, Value<T> right) :
             Signal<T>(clock),
-            lhs(std::move(lhs)),
-            rhs(std::move(rhs))
+            left(std::move(left)),
+            right(std::move(right))
         {
             
         }
         
         //! Construct a binary operation with two terms
-        BinaryOperation(Value<T> lhs, Value<T> rhs) :
-            BinaryOperation(lhs.getClock(), std::move(lhs), std::move(rhs))
+        BinaryOperation(Value<T> left, Value<T> right) :
+            BinaryOperation(left.getClock(), std::move(left), std::move(right))
         {
-            if (&lhs.getClock() != &rhs.getClock())
+            if (&left.getClock() != &right.getClock())
                 throw std::runtime_error("two clocks of binary operation don't match");
         }
         
     public:
         //! The left-hand side of the operation
-        Value<T> lhs;
+        Value<T> left;
         
         //! The left-hand side of the operation
-        Value<T> rhs;
+        Value<T> right;
         
     private:
         //! Generate a new sample
         void generateSample(T& out) final override
         {
-            combineSamples(lhs[0], rhs[0], out);
+            combineSamples(left[0], right[0], out);
         }
         
         //! Combine two samples into a new one
-        virtual void combineSamples(const T& lhs, const T& rhs, T& out) = 0;
+        virtual void combineSamples(const T& left, const T& right, T& out) = 0;
     };
 }
 
