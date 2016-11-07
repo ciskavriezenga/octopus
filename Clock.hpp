@@ -24,7 +24,7 @@ namespace octo
         virtual unit::hertz<float> getRate() const = 0;
         
         //! Return the delta between ticks
-        virtual unit::period<float> getDeltaPeriod() const { return getRate(); }
+        virtual unit::period<float> delta() const { return getRate(); }
         
         //! Move the clock to its next time index
         virtual unit::discrete<uint64_t> tick() = 0;
