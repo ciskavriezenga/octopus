@@ -15,6 +15,7 @@ set(HEADERS
     Division.hpp
     Fold.hpp
     Group.hpp
+    Impulse.hpp
     Join.hpp
     Negation.hpp
     Node.hpp
