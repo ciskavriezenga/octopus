@@ -62,8 +62,8 @@ namespace octo
             // Add sieves if we're upsizing
             for (auto i = oldSize; i < size; ++i)
             {
-                sieves.emplace_back(std::make_unique<Sieve<T>>(input, i));
-                setOutput("channel" + std::to_string(i), *sieves[i]);
+                sieves[i] = std::make_unique<Sieve<T>>(input, i);
+                addOutput("channel" + std::to_string(i), *sieves[i]);
             }
         }
         
