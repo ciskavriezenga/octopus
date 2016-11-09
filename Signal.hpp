@@ -64,7 +64,7 @@ namespace octo
             while (timestamp <= requestedTimestamp)
             {
                 ++timestamp;
-                cacheIndex = math::wrap(cacheIndex + 1, 0, cache.size());
+                cacheIndex = math::wrap<std::ptrdiff_t>(cacheIndex + 1, 0, cache.size());
                 generateSample(cache[cacheIndex]);
             }
             
@@ -74,7 +74,7 @@ namespace octo
             
             // Return the correct sample from the cache
             auto requestedIndex = (int64_t)cacheIndex + (int64_t)z;
-            return cache[math::wrap(requestedIndex, 0, cache.size())];
+            return cache[math::wrap<std::ptrdiff_t>(requestedIndex, 0, cache.size())];
         }
         
         //! Return the current sample of the signal
