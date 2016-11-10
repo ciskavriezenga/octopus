@@ -41,7 +41,6 @@ namespace octo
         //! Construct the signal
         Signal(Clock& clock) :
             clock(&clock),
-            cache(64),
             timestamp(clock.now())
         {
             
@@ -58,7 +57,7 @@ namespace octo
             
             if (timestamp <= now)
             {
-                timestamp = now;
+                timestamp = now + 1;
                 generateSample(cache);
             }
             
@@ -88,7 +87,7 @@ namespace octo
         Clock* clock = nullptr;
         
         //! A cache for previously generated samples
-        T cache;
+        T cache = T{};
         
         //! The timestamp of the next-to-be generated sample
         uint64_t timestamp = 0;
