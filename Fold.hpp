@@ -75,7 +75,7 @@ namespace octo
             if (inputs.empty())
                 out = {};
             else
-                out = std::accumulate(inputs.begin(), inputs.end(), init(), [&](auto& a, auto& b){ return fold(a, (*b)[0]); });
+                out = std::accumulate(inputs.begin(), inputs.end(), init(), [&](auto& a, auto& b){ return fold(a, (*b)()); });
         }
         
         //! Return the initial value of the fold

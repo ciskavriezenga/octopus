@@ -65,8 +65,8 @@ namespace octo
         //! Generate the next sample of the sine
         void generateSample(T& out) final override
         {
-            out = std::sin(phase * 6.28318530718 + phaseOffset[0]);
-            phase = math::wrap<long double>(phase + this->getClock().delta() * frequency[0], 0, 1);
+            out = std::sin(phase * 6.28318530718 + phaseOffset());
+            phase = math::wrap<long double>(phase + this->getClock().delta() * frequency(), 0, 1);
         }
         
     private:

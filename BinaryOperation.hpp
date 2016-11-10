@@ -58,7 +58,7 @@ namespace octo
         //! Generate a new sample
         void generateSample(T& out) final override
         {
-            combineSamples(left[0], right[0], out);
+            combineSamples(left(), right(), out);
         }
         
         //! Combine two samples into a new one

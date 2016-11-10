@@ -250,8 +250,8 @@ namespace octo
             switch (mode)
             {
                 case ValueMode::CONSTANT: out = constant; break;
-                case ValueMode::REFERENCE: out = (*reference)[0]; break;
-                case ValueMode::INTERNAL: out = (*internal)[0]; break;
+                case ValueMode::REFERENCE: out = (*reference)(); break;
+                case ValueMode::INTERNAL: out = (*internal)(); break;
             }
         }
         
