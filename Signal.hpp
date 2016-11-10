@@ -64,7 +64,7 @@ namespace octo
             while (timestamp <= requestedTimestamp)
             {
                 ++timestamp;
-                cacheIndex = math::wrap<std::ptrdiff_t>(cacheIndex + 1, 0, cache.size());
+                cacheIndex = static_cast<unsigned int>(math::wrap<std::ptrdiff_t>(cacheIndex + 1, 0, cache.size()));
                 generateSample(cache[cacheIndex]);
             }
             
@@ -78,7 +78,10 @@ namespace octo
         }
         
         //! Return the current sample of the signal
-        explicit operator T() const { return (*this)[0]; }
+        explicit operator T() { return (*this)[0]; }
+        
+        //! Override the call operator to return the current sample
+        const T& operator()() { return (*this)[0]; }
         
         //! Move this signal to the heap
         /*! Signals need to implement this to support in-place creation of signals in expressions.
