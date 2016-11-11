@@ -2,6 +2,7 @@
 #define OCTOPUS_VALUE_HPP
 
 #include <memory>
+#include <set>
 #include <stdexcept>
 
 #include "Signal.hpp"
@@ -16,6 +17,9 @@ namespace octo
     template <class T>
     class Value : public Signal<T>
     {
+    public:
+        class Listener;
+        
     public:
         //! Construct a value with constant value
         Value(Clock& clock, const T& constant = {}) : Signal<T>(clock), mode(ValueMode::CONSTANT), constant(constant) { }
@@ -59,18 +63,15 @@ namespace octo
                 {
                     case ValueMode::CONSTANT:
                         new (&constant) T(rhs.constant);
-                        if (onConstantSet)
-                            onConstantSet(constant);
+                        notifyConstantSet();
                         break;
                     case ValueMode::REFERENCE:
                         reference = rhs.reference;
-                        if (onSignalSet)
-                            onSignalSet(*reference);
+                        notifySignalSet();
                         break;
                     case ValueMode::INTERNAL:
                         new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
-                        if (onSignalSet)
-                            onSignalSet(*internal);
+                        notifySignalSet();
                         break;
                 }
             }
@@ -79,7 +80,7 @@ namespace octo
         }
         
         //! Destruct the value and release any contained data
-        ~Value() { reset(); }
+        ~Value() { reset(); assert(listeners.empty()); }
         
         //! Assign a new constant to the value
         Value& operator=(const T& constant)
@@ -92,8 +93,7 @@ namespace octo
             mode = ValueMode::CONSTANT;
             new (&this->constant) T(constant);
             
-            if (onConstantSet)
-                onConstantSet(constant);
+            notifyConstantSet();
             
             return *this;
         }
@@ -111,8 +111,7 @@ namespace octo
             
             reference.dependencies.emplace(this);
             
-            if (onSignalSet)
-                onSignalSet(*this->reference);
+            notifySignalSet();
             
             return *this;
         }
@@ -134,8 +133,7 @@ namespace octo
             mode = ValueMode::INTERNAL;
             new (&this->internal) std::unique_ptr<Signal<T>>(std::move(internal));
             
-            if (onSignalSet)
-                onSignalSet(*this->internal);
+            notifySignalSet();
             
             return *this;
         }
@@ -158,18 +156,15 @@ namespace octo
                 {
                     case ValueMode::CONSTANT:
                         new (&constant) T(rhs.constant);
-                        if (onConstantSet)
-                            onConstantSet(constant);
+                        notifyConstantSet();
                         break;
                     case ValueMode::REFERENCE:
                         reference = rhs.reference;
-                        if (onSignalSet)
-                            onSignalSet(*reference);
+                        notifySignalSet();
                         break;
                     case ValueMode::INTERNAL:
                         new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
-                        if (onSignalSet)
-                            onSignalSet(*internal);
+                        notifySignalSet();
                         break;
                 }
             }
@@ -223,8 +218,8 @@ namespace octo
         GENERATE_MOVE(Value)
         
     public:
-        std::function<void(const T&)> onConstantSet; //!< Called when the value is assigned a new constant
-        std::function<void(Signal<T>&)> onSignalSet; //!< Called when the value is assigned a new signal
+        //! A collection of listeners for Value events
+        std::set<Listener*> listeners;
         
     private:
         void deconstruct()
@@ -250,8 +245,8 @@ namespace octo
             switch (mode)
             {
                 case ValueMode::CONSTANT: out = constant; break;
-                case ValueMode::REFERENCE: out = (*reference)[0]; break;
-                case ValueMode::INTERNAL: out = (*internal)[0]; break;
+                case ValueMode::REFERENCE: out = (*reference)(); break;
+                case ValueMode::INTERNAL: out = (*internal)(); break;
             }
         }
         
@@ -260,6 +255,20 @@ namespace octo
         {
             assert(reference == &dependent);
             reset();
+        }
+        
+        void notifyConstantSet()
+        {
+            const auto temp = listeners;
+            for (auto& listener : temp)
+                listener->setToConstant(*this, constant);
+        }
+        
+        void notifySignalSet()
+        {
+            const auto temp = listeners;
+            for (auto& listener : temp)
+                listener->setToSignal(*this, isReference() ? *reference : *internal);
         }
         
     private:
@@ -278,6 +287,21 @@ namespace octo
             //! Holds owned signal unique_ptr if mode == ValueMode::OWNED
             std::unique_ptr<Signal<T>> internal;
         };
+    };
+    
+    //! Listener for events that happen to a Value
+    template <class T>
+    class Value<T>::Listener
+    {
+    public:
+        //! Virtual destructor, because this is a polymorphic base class
+        virtual ~Listener() = default;
+        
+        //! Called when the value is set to a constant
+        virtual void setToConstant(Value<T>& value, const T& constant) = 0;
+        
+        //! Called when the value is set to a signal
+        virtual void setToSignal(Value<T>& value, Signal<T>& signal) = 0;
     };
     
     //! Compare two values for equality

@@ -28,7 +28,7 @@ namespace octo
         //! Generate a negative sample
         void generateSample(T& out) final override
         {
-            out = -this->input[0];
+            out = -this->input();
         }
     };
 }

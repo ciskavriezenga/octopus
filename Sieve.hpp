@@ -53,7 +53,7 @@ namespace octo
         //! Generated the sifted ouf signal
         void generateSample(T& out) final override
         {
-            const auto& x = this->input[0];
+            const auto& x = this->input();
             out = channel < x.size() ? x[channel] : T{};
         }
     };

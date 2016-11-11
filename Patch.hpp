@@ -37,10 +37,11 @@ namespace octo
         
         //! Add a new output to the patch
         template <class T>
-        void addOutput(const std::string& name, Clock& clock)
+        Signal<T>& addOutput(const std::string& name, Clock& clock)
         {
             outputValues.emplace(name, std::make_unique<Value<T>>(clock));
             Group::addOutput(name, dynamic_cast<Value<T>&>(*outputValues[name]));
+            return dynamic_cast<Signal<T>&>(*outputValues[name]);
         }
         
         //! Change one of the outputs
