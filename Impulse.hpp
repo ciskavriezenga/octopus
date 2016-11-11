@@ -29,7 +29,7 @@ namespace octo
         void reset() { triggered = false; }
         
         // Inherited from Signal
-        GENERATE_MOVE(Impulse<T>)
+        GENERATE_MOVE(Impulse)
         
     private:
         //! Generate a new sample
