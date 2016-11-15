@@ -12,6 +12,7 @@ set(HEADERS
     Arithmetic.hpp
     BinaryOperation.hpp
     Clock.hpp
+    CrossFade.hpp
     Division.hpp
     Fold.hpp
     Group.hpp
