@@ -54,7 +54,7 @@ namespace octo
             if (!node.isSignalBase())
                 throw std::runtime_error("node at '" + nodeName + "' is not a signal base");
             
-            dynamic_cast<Value<T>&>(*outputValues[output]) = dynamic_cast<Signal<T>&>(node.asSignalBase());
+            static_cast<Value<T>&>(*outputValues[output]) = static_cast<Signal<T>&>(node.asSignalBase());
         }
         
         //! Change one of the outputs
@@ -63,7 +63,7 @@ namespace octo
         template <class T>
         void unassignOutput(const std::string& output)
         {
-            dynamic_cast<Value<T>&>(*outputValues[output]) = T{};
+            static_cast<Value<T>&>(*outputValues[output]) = T{};
         }
         
     private:

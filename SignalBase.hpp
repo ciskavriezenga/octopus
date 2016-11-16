@@ -18,6 +18,10 @@ namespace octo
         //! Retrieve the type info of the output
         virtual const std::type_info& getTypeInfo() const = 0;
         
+        //! Pull and retrieve the type-agnostic address of a sample
+        /*! The address is invalidated next time someone pulls the signal */
+        virtual const void* pull() = 0;
+        
     public:
         //! The dependencies of this signal
         std::set<SignalBase*> dependencies;

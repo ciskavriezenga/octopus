@@ -75,8 +75,9 @@ namespace octo
         //! Retrieve the clock this signal runs at
         Clock& getClock() const { return *clock; }
         
-        //! Retrieve the type info of the output
+        // Inherited from SignalBase
         const std::type_info& getTypeInfo() const final override { return typeid(T); }
+        const void* pull() final override { return &(*this)(); }
         
     private:
         //! Generate a new sample
