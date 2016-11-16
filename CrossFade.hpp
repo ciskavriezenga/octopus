@@ -37,7 +37,7 @@ namespace octo
         Value<float> fade;
         
         //! The function that will be used for easing
-        std::function<float(float)> ease = [](float v){ return math::easeLinear(v); };
+        std::function<float(float)> ease = [](float v){ return math::easeCosine(v); };
         
     private:
         // Inherited from BinaryOperation
