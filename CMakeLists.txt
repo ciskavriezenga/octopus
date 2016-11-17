@@ -34,7 +34,6 @@ set(HEADERS
 
 set(SOURCES
     Group.cpp
-    Node.cpp
     Patch.cpp
     SignalBase.cpp)
 
