@@ -20,6 +20,7 @@ set(HEADERS
     Join.hpp
     Negation.hpp
     Node.hpp
+    Octopus.hpp
     Patch.hpp
     Product.hpp
     Sieve.hpp
