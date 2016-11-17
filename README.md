@@ -1,13 +1,12 @@
 # Octopus
 
-Octopus is a modern C++ library for embedding digital signal processing as a language inside your software. It works cross-domain (e.g. audio, video, math, economics, etc.), even combining signals of different domains in the same processing graph. Liboctopus makes heavy use of C++ operator overloading where it makes sense (arithmetic and mono-stereo operations).
+Octopus is a modern C++ library for embedding digital signal processing as a language inside your software. It transcends single domains (e.g. audio, video, math, etc.), combining signals of different domains and clocks in the same processing graph. Liboctopus makes heavy use of C++ operator overloading where it makes sense (arithmetic and mono-stereo operations).
 
 Other features of Octopus include:
 
  - A syntax as close to DSP mathematics as possible
  - Other signal types besides real numbers (booleans, bitmaps of even your own classes)
  - Different clocks with different sample rates in the same graph
- - Caching of samples in the past
  - Extensibility: write your own custom signals
 
 ## Examples
@@ -26,7 +25,7 @@ oscillator.frequency = 440 + 100 * Sine<float>(audio, 0.5);
 do
 {
   // Output the current sample of the oscillator (= z^0)
-  cout << oscillator[0] << endl;
+  cout << oscillator() << endl;
   
 // Move the audio clock to its next frame each iteration, up to its hundredth
 } while (audio.tick() < 100);
@@ -52,15 +51,15 @@ private:
 	{
 	    // Retrieve the current sample of the input (according to its own clock),
 	    // multiplty it with 0.5 and set that as the new output sample
-	    out = input[0] * 0.5;
+	    out = input[() * 0.5;
 	}
 };
 
 InvariableClock audio(96000);
 MySignal mySignal(audio);
-mySgignal.input = Sine<float>(audio, 2.3);
+mySignal.input = Sine<float>(audio, 2.3);
 ```
 
 ## Platforms
 
-Octopus should work with any compiler on any platform that supports modern C++ (14, 17). It contains no platform-dependent code.
+Octopus should work with any compiler on any platform that supports modern C++ (17). It contains no platform-dependent code.
