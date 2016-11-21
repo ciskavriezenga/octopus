@@ -12,21 +12,17 @@ set(HEADERS
     Arithmetic.hpp
     BinaryOperation.hpp
     Clock.hpp
-    CrossFade.hpp
     Division.hpp
     Fold.hpp
     Group.hpp
-    Impulse.hpp
     Join.hpp
     Negation.hpp
     Node.hpp
     Octopus.hpp
-    Patch.hpp
     Product.hpp
     Sieve.hpp
 	Signal.hpp
 	SignalBase.hpp
-    Sine.hpp
     Split.hpp
     Subtraction.hpp
     Sum.hpp
@@ -35,7 +31,6 @@ set(HEADERS
 
 set(SOURCES
     Group.cpp
-    Patch.cpp
     SignalBase.cpp)
 
 target_sources(octopus PRIVATE ${HEADERS} ${SOURCES})
