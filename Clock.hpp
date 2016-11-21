@@ -31,7 +31,6 @@
 
 #include <chrono>
 #include <cstdint>
-#include <unit/hertz.hpp>
 
 namespace octo
 {
