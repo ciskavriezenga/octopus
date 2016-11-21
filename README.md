@@ -50,7 +50,7 @@ private:
 	void generateSample(T& out) final override
 	{
 	    // Retrieve the current sample of the input (according to its own clock),
-	    // multiplty it with 0.5 and set that as the new output sample
+	    // multiply it with 0.5 and set that as the new output sample
 	    out = input[() * 0.5;
 	}
 };
