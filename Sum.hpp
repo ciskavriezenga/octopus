@@ -35,7 +35,7 @@
 
 namespace octo
 {
-    //! Sums an variadic amount of values into one
+    //! Sums an variadic amount of signals into one
     template <class T>
     class Sum : public Fold<T>
     {

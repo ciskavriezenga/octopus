@@ -33,7 +33,7 @@
 
 namespace octo
 {
-    //! Generates a Dirac impulse signal
+    //! Generates a unit impulse signal (1, 0, 0, 0, 0...)
     template <class T>
     class Impulse : public Signal<T>
     {
@@ -60,7 +60,7 @@ namespace octo
         }
         
     private:
-        //! Has the value 1 impulse already been fired?
+        //! Has the unit sample already been fired?
         bool triggered = false;
     };
 }

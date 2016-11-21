@@ -41,6 +41,11 @@ namespace octo
     class Clock;
     
     //! Splits a multi-channel signal into multiple single-channel ones
+    /*! Signals with a vector type are the common idiom within Octopus for representing
+        multi-channel signals. Splits are used to filter out all of their channels at once.
+        If you'd like to filter out just a single channel, use a Sieve.
+     
+        The channels in a split are named "channel0", "channel1", "channel2", etc. */
     template <class T>
     class Split : public Group
     {
@@ -67,7 +72,7 @@ namespace octo
             
         }
         
-        //! Resize the number of sieves
+        //! Change the number of sieves
         void resize(std::size_t size)
         {
             // Store the current size for use during down-/upsizing

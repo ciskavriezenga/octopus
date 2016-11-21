@@ -36,6 +36,9 @@
 namespace octo
 {
     //! Sifts out a single channel from a multi-channel signal
+    /*! Signals with a vector type are the common idiom within Octopus for representing
+        multi-channel signals. Sieves are used to filter out one their channels. If you'd
+        like to filter out all channels at once, use a Split. */
     template <class T>
     class Sieve : public UnaryOperation<std::vector<T>, T>
     {

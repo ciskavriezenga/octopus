@@ -41,21 +41,24 @@
 namespace octo
 {
     //! Folds a variadic amount of signals into one
+    /*! Folds (a term coming from functional programming) form a big category of signals. They
+        take multiple signals of the same type and fold them into a single output signal. Sum and
+        Product are good examples (they fold by applying + or * on each input signal). */
     template <class In, class Out = In>
     class Fold : public Signal<Out>
     {
     public:
-        //! Construct an empty sum
+        //! Construct an empty fold
         Fold(Clock& clock) : Signal<Out>(clock) { }
         
-        //! Construct an empty sum
+        //! Construct an empty fold
         Fold(Clock& clock, std::size_t size) :
             Signal<Out>(clock)
         {
             resize(size);
         }
         
-        //! Construct a sum with two terms and a clock
+        //! Construct a fold with two terms and a clock
         Fold(Clock& clock, Value<In> lhs, Value<In> rhs) :
             Signal<Out>(clock)
         {
@@ -63,7 +66,8 @@ namespace octo
             this->emplace(std::move(rhs));
         }
         
-        //! Construct a sum with two terms
+        //! Construct a fold with two terms
+        /*! @throw std::runtime_error: If the terms do not share the same clock */
         Fold(Value<In> lhs, Value<In> rhs) :
             Signal<Out>(lhs.getClock())
         {
@@ -74,13 +78,16 @@ namespace octo
             this->emplace(std::move(rhs));
         }
         
+        //! Virtual destructor, because this is a polymorphic base class
+        ~Fold() = default;
+        
         //! Add a new input to the fold
         void emplace(Value<In> input)
         {
             inputs.emplace_back(std::make_unique<Value<In>>(std::move(input)));
         }
         
-        //! Resize the amount of inputs
+        //! Change the amount of inputs
         void resize(std::size_t size)
         {
             const auto oldSize = inputs.size();
@@ -90,10 +97,10 @@ namespace octo
                 inputs[i] = std::make_unique<Value<In>>(this->getClock());
         }
         
-        //! Retrieve one of the inputs of the fold
+        //! Retrieve one of the inputs
         Value<In>& getInput(std::size_t index) { return *inputs.at(index); }
         
-        //! Return the number of inputs to the fold
+        //! Return the number of inputs
         std::size_t getInputCount() const { return inputs.size(); }
         
     private:
@@ -107,9 +114,14 @@ namespace octo
         }
         
         //! Return the initial value of the fold
+        /*! The initial value with which input samples will be combined.
+            For an addition fold this would be 0, because 0 + x = x.
+            For a multiplication fold this would be 1, because 1 * x = x */
         virtual Out init() const = 0;
         
-        //! Folds an input sample with some output value
+        //! Combine an input sample with an output state sample, effectively folding it in
+        /*! This funtion is called on each input, where the output is given as the first argument to the next call.
+            It 'accumulates' all input samples in a single sample of type Out. */
         virtual Out fold(const Out& out, const In& in) const = 0;
         
     private:

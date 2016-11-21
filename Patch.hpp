@@ -42,7 +42,7 @@ namespace octo
 {
     class Clock;
     
-    //! Owner of multiple nodes, some of them used as outputs for the patch (= group)
+    //! A patched up Group of signals, of which some are outputs
     class Patch : public Group
     {
     public:

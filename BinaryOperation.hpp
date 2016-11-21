@@ -36,7 +36,7 @@
 
 namespace octo
 {
-    //! Combine two signals into one
+    //! Applies a binary operation on two input signals
     template <class T>
     class BinaryOperation : public Signal<T>
     {

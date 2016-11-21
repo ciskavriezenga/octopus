@@ -35,7 +35,7 @@
 
 namespace octo
 {
-    //! Multiples an variadic amount of values into one
+    //! Multiplies an variadic amount of signals with each other
     template <class T>
     class Product : public Fold<T>
     {

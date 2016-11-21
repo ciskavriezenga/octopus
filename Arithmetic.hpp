@@ -29,6 +29,8 @@
 #ifndef OCTOPUS_ARITHMETIC_HPP
 #define OCTOPUS_ARITHMETIC_HPP
 
+// Includes all signals that have to do with arithmetic
+
 #include "Division.hpp"
 #include "Negation.hpp"
 #include "Product.hpp"

@@ -39,9 +39,34 @@ namespace octo
 {
     enum class ValueMode { CONSTANT, REFERENCE, INTERNAL };
     
-    //! Signal that depends on external factors to output its value
-    /*! Value either takes its output from a constant variable, another referenced signal, or one it owns
-        internally. It does not generate samples itself */
+    //! Signal that depends on an external factor to generate data
+    /*! Values are without a doubt the most used signals in Octopus. While being signals themselves, they
+        don't generate new sample data out of their own. Values can be set to refer to other signals, reusing
+        their output as transparent pass-throughs. Values can also be given a constant value of T, which they
+        will then output as a DC.
+     
+        The most common use for Value objects is as inputs of actual signals:
+        @code{cpp}
+        class Sine : public Signal<float>
+        {
+        public:
+            Value<float> frequency;
+     
+        private:
+            void generateSample(float& out)
+            {
+                ...
+                // Request the frequency at the current sample
+                auto f = frequency();
+                ...
+            }
+        };
+     
+        Sine sine;
+     
+        // Plug the sine output into its frequency
+        sine.frequency = sine;
+        @endcode */
     template <class T>
     class Value : public Signal<T>
     {

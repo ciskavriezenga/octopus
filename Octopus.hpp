@@ -26,6 +26,8 @@
  
  */
 
+// Utility header for including all basics of Octopus
+
 #ifndef OCTOPUS_OCTOPUS_HPP
 #define OCTOPUS_OCTOPUS_HPP
 

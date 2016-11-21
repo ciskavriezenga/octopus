@@ -40,31 +40,43 @@
 namespace octo
 {
     //! Multiple signals in one monolith object
+    /*! Groups contains one or more output signals, functioning as it were as a multi-output
+        signal, without being Signals themselves. Patches are a good example, as well as Split,
+        which contains a Sieve per channel, without Split itself being a signal. 
+     
+        When requesting outputs from a Group, it is up to the user to know the sample type
+        of the output. */
     class Group
     {
     public:
         //! Virtual, because this is a polymorphic base class
         virtual ~Group() = default;
         
-        //! Retrieve one of the outputs as a typeless signal base
+        //! Retrieve one of the outputs as a typeless SignalBase
+        /*! If you know the sample type of a particalar output, it is easier to call the templated
+            version of this function.
+            @throw std::runtime_error: If no output with this name exists */
         SignalBase& getOutput(const std::string& name);
         
-        //! Retrieve one of the outputs as a typed signal
+        //! Retrieve one of the outputs as a typed Signal
+        /*! @throw std::runtime_error: If no output with this name exists */
         template <class T>
         Signal<T>& getOutput(const std::string& name) { return dynamic_cast<Signal<T>&>(getOutput(name)); }
         
         //! Retrieve the number of outputs
         std::size_t getOutputCount() const { return outputs.size(); }
         
-        //! Retrieve the names used as keys for the outputs
+        //! Retrieve the names of all outputs
         /*! @note The order is undefined and you should not depend on it! */
         std::set<std::string> getOutputNames() const;
         
     protected:
         //! Add a new output
+        /*! Derivatives can call this function to add an output to the group */
         void addOutput(const std::string& name, SignalBase& signal);
         
         //! Remove one of the outputs
+        /*! Derivatives can call this function to remove an output from the group */
         void removeOutput(const std::string& name);
         
     private:

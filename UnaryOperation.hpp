@@ -34,7 +34,7 @@
 
 namespace octo
 {
-    //! Transform a single signal into another
+    //! Applies a unary operation on a single input signal
     template <class In, class Out = In>
     class UnaryOperation : public Signal<Out>
     {

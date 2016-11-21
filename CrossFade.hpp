@@ -55,7 +55,7 @@ namespace octo
         //! The fading value (0 = left, 1 = right)
         Value<float> fade;
         
-        //! The function that will be used for easing
+        //! The function that will be used for easing between silence and full-volume
         std::function<float(float)> ease = [](float v){ return math::easeCosine(v); };
         
     private:

@@ -35,7 +35,16 @@
 
 namespace octo
 {
-    //! Joins multiple signals into one multi-channel signal
+    //! Join multiple signals into one multi-channel signal
+    /*! Combines multiple signals of type T into a signal of type std::vector<T>.
+        Signals with a vector type are the common idiom within Octopus for representing
+        multi-channel signals.
+     
+        Signals can be easily joined using the & syntax
+        @code{cpp}
+        Sine<float> sine1(clock), sine2(clock);
+        auto join = sine1 & sine2;
+        @endcode*/
     template <class T>
     class Join : public Fold<T, std::vector<T>>
     {

@@ -35,7 +35,7 @@
 
 namespace octo
 {
-    //! Subtracts a signal from another
+    //! Subtract a signal from another
     template <class T>
     class Subtraction : public BinaryOperation<T>
     {
