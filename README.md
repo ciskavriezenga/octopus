@@ -57,7 +57,7 @@ private:
 		out = std::sin(phase * 6.28318530717959);
 
 		// Increment and wrap the phase
-		phase = +=  this->getClock().delta() * frequency();
+		phase += this->getClock().delta() * frequency();
 		while (phase >= 1.0)
 			phase -= 1.0;
 	}
