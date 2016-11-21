@@ -51,6 +51,14 @@ namespace octo
     public:        
         using Fold<T, std::vector<T>>::Fold;
         
+        //! Add another channel to the join
+        template <class U>
+        Join& operator&=(U&& rhs)
+        {
+            this->emplace(std::forward<U&&>(rhs));
+            return *this;
+        }
+        
         // Generate the move function
         GENERATE_MOVE(Join)
         
