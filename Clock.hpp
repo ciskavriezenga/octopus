@@ -44,10 +44,10 @@ namespace octo
         virtual ~Clock() = default;
         
         //! Return the rate at which the clock runs
-        virtual unit::hertz<float> getRate() const = 0;
+        virtual unit::hertz<float> rate() const = 0;
         
         //! Return the delta between ticks
-        virtual unit::period<float> delta() const { return getRate(); }
+        virtual unit::period<float> delta() const { return rate(); }
         
         //! Move the clock to its next time index
         virtual unit::discrete<uint64_t> tick() = 0;
@@ -72,16 +72,16 @@ namespace octo
         //! Construct the clock
         /*! @param rate: The rate at which the clocks runs (changes only with setRate). */
         InvariableClock(unit::hertz<float> rate) :
-            rate(rate)
+            rate_(rate)
         {
             
         }
         
         //! Set the sample rate of the clock
-        void setRate(unit::hertz<float> rate) { this->rate = rate; }
+        void setRate(unit::hertz<float> rate) { rate_ = rate; }
         
         //! Return the rate at which the clock runs
-        unit::hertz<float> getRate() const final override { return rate; }
+        unit::hertz<float> rate() const final override { return rate_; }
         
         //! Move the clock to its next time index
         unit::discrete<uint64_t> tick() final override { return ++timestamp; }
@@ -91,7 +91,7 @@ namespace octo
         
     private:
         //! The rate at which the clock runs
-        unit::hertz<float> rate = 0;
+        unit::hertz<float> rate_ = 0;
         
         //! The current time index of the clock
         unit::discrete<uint64_t> timestamp = 0;
@@ -113,19 +113,19 @@ namespace octo
         //! Construct the clock
         /*! @param startingRate: The rate at which the clocks starts running (will be influenced by subsequent ticks) */
         VariableClock(unit::hertz<float> startingRate) :
-            rate(startingRate)
+            rate_(startingRate)
         {
             lastNow = std::chrono::high_resolution_clock::now();
         }
         
         //! Return the rate at which the clock runs
-        unit::hertz<float> getRate() const final override { return rate; }
+        unit::hertz<float> rate() const final override { return rate_; }
         
         //! Move the clock to its next time index
         unit::discrete<uint64_t> tick() final override
         {
             auto now = std::chrono::high_resolution_clock::now();
-            rate = 1.0 / std::chrono::duration_cast<std::chrono::duration<double>>(lastNow - now).count();
+            rate_ = 1.0 / std::chrono::duration_cast<std::chrono::duration<double>>(lastNow - now).count();
             lastNow = now;
             
             return ++timestamp;
@@ -136,7 +136,7 @@ namespace octo
         
     private:
         //! The rate at which the clock currently runs
-        unit::hertz<float> rate = 0;
+        unit::hertz<float> rate_ = 0;
         
         //! The current time index of the clock
         unit::discrete<uint64_t> timestamp = 0;
