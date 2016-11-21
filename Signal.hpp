@@ -29,7 +29,6 @@
 #ifndef OCTOPUS_SIGNAL_HPP
 #define OCTOPUS_SIGNAL_HPP
 
-#include <dsperados/math/utility.hpp>
 #include <memory>
 #include <stdexcept>
 #include <vector>
@@ -40,27 +39,32 @@
 namespace octo
 {
     //! A discrete signal of _any_ given type.
-    /*! This is the major base class of all signal processing. Everything is a signal and
-        individual samples can be accessed using the subscript operator, like so:
+    /*! This is the major class of all signal processing. Everything in octopus is a signal
+        derivative. When constructing a signal, it asks for a Clock (see Clock.hpp for more
+        information), which it will use for time keeping.
      
         @code{.cpp}
-        Sine sine;
-        cout << sine[0] << sine[1] << endl;
-     
-        AudioFile file;
-        auto x = file[2] * file[2];
+        InvariableClock clock;
+        Sine<float> sine(clock);
         @endcode
      
-        Besides accessing individual signal elements using the math-like [] syntax, one can
-        manipulate signals as monolithic entities, reminiscent of mathematical signal theory
+        Requesting samples from a signal can be done by calling the signal. This will return
+        the same value until the clock has been moved forward with tick(). Therefore, walking
+        through a signal corresponds to repeatedly requesting a sample and moving the clock further.
+     
+        @code{cpp}
+        cout << sine() << endl;
+        clock.tick();
+        cout << sine() << endl;
+        @endcode
+     
+        Besides accessing individual signal elements using call-syntax, one can manipulate signals
+        as monolithic entities, reminiscent of mathematical signal theory.
         formulas.
      
         @code{.cpp}
         // Vibrato
-        sine.frequency = Sine(0.1) * 30 + 440;
-     
-        // A very simple low-pass filter
-        auto filter = (x + Delay(x, 1)) * 0.5;
+        sine.frequency = Sine<float>(clock, 0.1) * 30 + 440;
         @endcode */
     template <class T>
     class Signal : public SignalBase
@@ -78,7 +82,7 @@ namespace octo
         virtual ~Signal() = default;
         
         //! Retrieve a signal of the sample, relative to the its clock's current timestamp
-        /*! @return A reference to the generated sample in cache. Copy and be done with it, this could change with each new [] call */
+        /*! @return A reference to the generated sample in cache. Copy and be done with it, this could change with each call */
         const T& operator()()
         {
             const auto now = clock->now();
