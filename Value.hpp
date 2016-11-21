@@ -29,6 +29,7 @@
 #ifndef OCTOPUS_VALUE_HPP
 #define OCTOPUS_VALUE_HPP
 
+#include <cassert>
 #include <memory>
 #include <set>
 #include <stdexcept>

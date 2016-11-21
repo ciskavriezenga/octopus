@@ -31,28 +31,38 @@ do
 } while (audio.tick() < 100);
 ```
 ```
-// Create your own custom signal
-class MySignal : public Signal<float>
+// Create the sine signal used above
+class Sine : public Signal<float>
 {
 public:
-    // Take a clock in the constructor and pass it to the base class
-    MySignal(Clock& clock) : Signal<float>(clock) { }
+	// Take a clock in the constructor and pass it to the base class
+	MySignal(Clock& clock) :
+		Signal<float>(clock),
+		frequency(clock)
+	{
+
+	}
     
-	// Create a Value signal for the input to this signal
-	// Value can be set to a constant float value, or refer to another signal
-	Value<float> input;
+	// Create a Value signal for the frequency to this signal
+	// Values can be set to a constant float value, or refer to another signal
+	Value<float> frequency;
 	
-    // Utility macro necessary for each signal
-    GENERATE_MOVE(MySignal)
+	// Utility macro necessary for each signal
+	GENERATE_MOVE(MySignal)
     
 private:
 	// This function will be called whenever a new sample is needed
 	void generateSample(T& out) final override
 	{
-	    // Retrieve the current sample of the input (according to its own clock),
-	    // multiplty it with 0.5 and set that as the new output sample
-	    out = input[() * 0.5;
+		out = std::sin(phase * 6.28318530717959);
+
+		// Increment and wrap the phase
+		phase += this->getClock().delta() * frequency();
+		while (phase >= 1.0)
+			phase -= 1.0;
 	}
+
+	long double phase = 0;
 };
 
 InvariableClock audio(96000);

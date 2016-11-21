@@ -31,7 +31,6 @@
 
 #include <chrono>
 #include <cstdint>
-#include <unit/discrete.hpp>
 #include <unit/hertz.hpp>
 
 namespace octo
@@ -43,17 +42,17 @@ namespace octo
         //! Virtual destructor, because this is a base class
         virtual ~Clock() = default;
         
-        //! Return the rate at which the clock runs
-        virtual unit::hertz<float> rate() const = 0;
+        //! Return the rate at which the clock runs (in Hertz)
+        virtual float rate() const = 0;
         
-        //! Return the delta between ticks
-        virtual unit::period<float> delta() const { return rate(); }
+        //! Return the delta between ticks (in seconds)
+        virtual float delta() const { return 1.0 / rate(); }
         
         //! Move the clock to its next time index
-        virtual unit::discrete<uint64_t> tick() = 0;
+        virtual uint64_t tick() = 0;
         
         //! Return the clocks current time index
-        virtual unit::discrete<uint64_t> now() const = 0;
+        virtual uint64_t now() const = 0;
     };
     
     //! A clock with an invariable, constant rate
@@ -71,30 +70,30 @@ namespace octo
     public:
         //! Construct the clock
         /*! @param rate: The rate at which the clocks runs (changes only with setRate). */
-        InvariableClock(unit::hertz<float> rate) :
-            rate_(rate)
+        InvariableClock(float rateInHertz) :
+            rate_(rateInHertz)
         {
             
         }
         
-        //! Set the sample rate of the clock
-        void setRate(unit::hertz<float> rate) { rate_ = rate; }
+        //! Set the sample rate of the clock (in Hertz)
+        void setRate(float rateInHertz) { rate_ = rateInHertz; }
         
-        //! Return the rate at which the clock runs
-        unit::hertz<float> rate() const final override { return rate_; }
+        //! Return the rate at which the clock runs (in Hertz)
+        float rate() const final override { return rate_; }
         
         //! Move the clock to its next time index
-        unit::discrete<uint64_t> tick() final override { return ++timestamp; }
+        uint64_t tick() final override { return ++timestamp; }
         
         //! Return the clocks current time index
-        unit::discrete<uint64_t> now() const final override { return timestamp; }
+        uint64_t now() const final override { return timestamp; }
         
     private:
         //! The rate at which the clock runs
-        unit::hertz<float> rate_ = 0;
+        float rate_ = 0;
         
         //! The current time index of the clock
-        unit::discrete<uint64_t> timestamp = 0;
+        uint64_t timestamp = 0;
     };
     
     //! A clock with a variable sample rate
@@ -112,17 +111,17 @@ namespace octo
     public:
         //! Construct the clock
         /*! @param startingRate: The rate at which the clocks starts running (will be influenced by subsequent ticks) */
-        VariableClock(unit::hertz<float> startingRate) :
-            rate_(startingRate)
+        VariableClock(float startingRateInHertz) :
+            rate_(startingRateInHertz)
         {
             lastNow = std::chrono::high_resolution_clock::now();
         }
         
-        //! Return the rate at which the clock runs
-        unit::hertz<float> rate() const final override { return rate_; }
+        //! Return the rate at which the clock runs (in Hertz)
+        float rate() const final override { return rate_; }
         
         //! Move the clock to its next time index
-        unit::discrete<uint64_t> tick() final override
+        uint64_t tick() final override
         {
             auto now = std::chrono::high_resolution_clock::now();
             rate_ = 1.0 / std::chrono::duration_cast<std::chrono::duration<double>>(lastNow - now).count();
@@ -132,14 +131,14 @@ namespace octo
         }
         
         //! Return the clocks current time index
-        unit::discrete<uint64_t> now() const final override { return timestamp; }
+        uint64_t now() const final override { return timestamp; }
         
     private:
         //! The rate at which the clock currently runs
-        unit::hertz<float> rate_ = 0;
+        float rate_ = 0;
         
         //! The current time index of the clock
-        unit::discrete<uint64_t> timestamp = 0;
+        uint64_t timestamp = 0;
         
         //! The time at the previous tick() call
         std::chrono::high_resolution_clock::time_point lastNow;
