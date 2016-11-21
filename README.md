@@ -54,7 +54,7 @@ private:
 	// This function will be called whenever a new sample is needed
 	void generateSample(T& out) final override
 	{
-		out = std::sin(phase * 6,28318530717959);
+		out = std::sin(phase * 6.28318530717959);
 
 		// Increment and wrap the phase
 		phase = +=  this->getClock().delta() * frequency();
