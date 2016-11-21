@@ -5,7 +5,7 @@ Octopus is a modern C++ library for embedding digital signal processing as a lan
 Other features of Octopus include:
 
  - A syntax as close to DSP mathematics as possible
- - Other signal types besides real numbers (booleans, bitmaps of even your own classes)
+ - Other signal types besides real numbers (booleans, bitmaps or even your own classes)
  - Different clocks with different sample rates in the same graph
  - Extensibility: write your own custom signals
 
@@ -64,10 +64,6 @@ private:
 
 	long double phase = 0;
 };
-
-InvariableClock audio(96000);
-MySignal mySignal(audio);
-mySignal.input = Sine<float>(audio, 2.3);
 ```
 
 ## Platforms
