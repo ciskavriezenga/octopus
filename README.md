@@ -8,6 +8,12 @@ Other features of Octopus include:
  - Other signal types besides real numbers (booleans, bitmaps or even your own classes)
  - Different clocks with different sample rates in the same graph
  - Extensibility: write your own custom signals
+ 
+***Octopus is written in c++17. Make sure to add the -std=c++1z flag to your compiler!***
+ 
+## Documentation
+
+A Doxygen generated documentation can be found [here](http://api.dsperados.com/octopus).
 
 ## Examples
 
