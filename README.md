@@ -10,10 +10,6 @@ Other features of Octopus include:
  - Extensibility: write your own custom signals
  
 ***Octopus is written in c++17. Make sure to add the -std=c++1z flag to your compiler!***
- 
-## Documentation
-
-A Doxygen generated documentation can be found [here](http://api.dsperados.com/octopus).
 
 ## Examples
 
@@ -72,6 +68,36 @@ private:
 };
 ```
 
+
+## Installation
+
+A [Homebrew](http://brew.sh) and [LinuxBrew](http://linuxbrew.sh) formula exists for macOS and Linux respectively.
+
+```
+brew tap dsperados/tap
+brew install octopus
+```
+
+Octopus can also be built manually, by running the CMake script in the root.
+
+```
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
+
+This library is written in c++17. Make sure you have the **latest version** of your compiler (on macOS this would be **Xcode 7** or higher), and add the **-std=c++1z** flag to your compiler!
+
+## Documentation
+
+A Doxygen generated documentation can be found [here](http://api.dsperados.com/octopus).
+
 ## Platforms
 
 Octopus should work with any compiler on any platform that supports modern C++ (17). It contains no platform-dependent code.
+
+## License
+
+The entire Bear Suite, including BearAudio is licensed under GPLv3. Commercial licensing is available upon request.
