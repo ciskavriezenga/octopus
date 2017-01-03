@@ -32,7 +32,6 @@
 #include <memory>
 #include <vector>
 
-#include "Group.hpp"
 #include "Sieve.hpp"
 #include "Value.hpp"
 
@@ -47,7 +46,7 @@ namespace octo
      
         The channels in a split are named "channel0", "channel1", "channel2", etc. */
     template <class T>
-    class Split : public Group
+    class Split
     {
     public:
         //! Construct the split
@@ -76,26 +75,26 @@ namespace octo
         void resize(std::size_t size)
         {
             // Store the current size for use during down-/upsizing
-            const auto oldSize = getOutputCount();
-            
-            // Remove sieves if we're downsizing
-            for (auto i = size; i < oldSize; ++i)
-                removeOutput("channel" + std::to_string(i));
+            const auto oldSize = sieves.size();
             
             sieves.resize(size);
             
             // Add sieves if we're upsizing
             for (auto i = oldSize; i < size; ++i)
-            {
                 sieves[i] = std::make_unique<Sieve<T>>(input, i);
-                addOutput("channel" + std::to_string(i), *sieves[i]);
-            }
         }
+        
+        //! Retrieve the size of the split
+        std::size_t size() const { return sieves.size(); }
+        
+        //! Retrieve one of the sieves
+        Sieve<T>& operator[](std::size_t index) { return *sieves.at(index); }
         
     public:
         //! The input to the split
         Value<std::vector<T>> input;
         
+    private:
         //! The sieves that make up this split
         std::vector<std::unique_ptr<Sieve<T>>> sieves;
     };
