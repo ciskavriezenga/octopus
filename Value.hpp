@@ -299,6 +299,9 @@ namespace octo
             }
         }
         
+        // Inherited from Signal
+        void clockChanged(Clock& clock) final override { }
+        
         //! Reset the value, because the referenced signal will be destructed
         void dependentWillBeDestructed(SignalBase& dependent) final override
         {

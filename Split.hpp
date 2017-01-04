@@ -90,6 +90,13 @@ namespace octo
         //! Retrieve one of the sieves
         Sieve<T>& operator[](std::size_t index) { return *sieves.at(index); }
         
+        //! Change the clock of all sieves
+        void setClock(Clock& clock)
+        {
+            for (auto& sieve : sieves)
+                sieve->setClock(clock);
+        }
+        
     public:
         //! The input to the split
         Value<std::vector<T>> input;
