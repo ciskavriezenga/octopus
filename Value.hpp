@@ -31,6 +31,7 @@
 
 #include <cassert>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <stdexcept>
 
@@ -137,10 +138,13 @@ namespace octo
         //! Assign a new constant to the value
         Value& operator=(const T& constant)
         {
-            deconstruct();
-            
-            mode = ValueMode::CONSTANT;
-            new (&this->constant) T(constant);
+            {
+                std::unique_lock<std::mutex> lock(mutex);
+                deconstruct();
+                
+                mode = ValueMode::CONSTANT;
+                new (&this->constant) T(constant);
+            }
             
             notifyConstantSet();
             
@@ -153,12 +157,15 @@ namespace octo
             if (isReference() && this->reference == &reference)
                 return *this;
             
-            deconstruct();
-            
-            mode = ValueMode::REFERENCE;
-            new (&this->reference) Signal<T>*(&reference);
-            
-            reference.dependencies.emplace(this);
+            {
+                std::unique_lock<std::mutex> lock(mutex);
+                deconstruct();
+                
+                mode = ValueMode::REFERENCE;
+                new (&this->reference) Signal<T>*(&reference);
+                
+                reference.dependees.emplace(this);
+            }
             
             notifySignalSet();
             
@@ -177,10 +184,13 @@ namespace octo
             if (!internal)
                 throw std::invalid_argument("nullptr given to Value");
             
-            deconstruct();
-            
-            mode = ValueMode::INTERNAL;
-            new (&this->internal) std::unique_ptr<Signal<T>>(std::move(internal));
+            {
+                std::unique_lock<std::mutex> lock(mutex);
+                deconstruct();
+                
+                mode = ValueMode::INTERNAL;
+                new (&this->internal) std::unique_ptr<Signal<T>>(std::move(internal));
+            }
             
             notifySignalSet();
             
@@ -200,22 +210,22 @@ namespace octo
                 (isConstant() && constant != rhs.constant) ||
                 (isReference() && reference != rhs.reference))
             {
+                std::unique_lock<std::mutex> lock(mutex);
                 deconstruct();
                 switch ((mode = rhs.mode))
                 {
-                    case ValueMode::CONSTANT:
-                        new (&constant) T(rhs.constant);
-                        notifyConstantSet();
-                        break;
-                    case ValueMode::REFERENCE:
-                        reference = rhs.reference;
-                        notifySignalSet();
-                        break;
-                    case ValueMode::INTERNAL:
-                        new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
-                        notifySignalSet();
-                        break;
+                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); break;
+                    case ValueMode::REFERENCE: reference = rhs.reference; break;
+                    case ValueMode::INTERNAL: new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal)); break;
                 }
+            }
+            
+            // We're notifying in a different switch, so that we can unlock the mutex earlier
+            switch (mode)
+            {
+                case ValueMode::CONSTANT: notifyConstantSet(); break;
+                case ValueMode::REFERENCE: notifyConstantSet(); break;
+                case ValueMode::INTERNAL: notifyConstantSet(); break;
             }
             
             rhs.reset();
@@ -271,6 +281,8 @@ namespace octo
         std::set<Listener*> listeners;
         
     private:
+        //! Deconstructs what's in the union
+        /*! Internal use only. A new construction should take place immediately afterwards */
         void deconstruct()
         {
             switch (mode)
@@ -279,7 +291,7 @@ namespace octo
                     constant.~T();
                     break;
                 case ValueMode::REFERENCE:
-                    reference->dependencies.erase(this);
+                    reference->dependees.erase(this);
                     reference = nullptr;
                     break;
                 case ValueMode::INTERNAL:
@@ -291,6 +303,7 @@ namespace octo
         //! Generate a new sample
         void generateSample(T& out) final override
         {
+            std::unique_lock<std::mutex> lock(mutex);
             switch (mode)
             {
                 case ValueMode::CONSTANT: out = constant; break;
@@ -303,7 +316,7 @@ namespace octo
         void clockChanged(Clock& clock) final override { }
         
         //! Reset the value, because the referenced signal will be destructed
-        void dependentWillBeDestructed(SignalBase& dependent) final override
+        void disconnectFromDependent(SignalBase& dependent) final override
         {
             assert(reference == &dependent);
             reset();
@@ -339,6 +352,9 @@ namespace octo
             //! Holds owned signal unique_ptr if mode == ValueMode::OWNED
             std::unique_ptr<Signal<T>> internal;
         };
+        
+        //! A mutex for updating the value reference
+        std::mutex mutex;
     };
     
     //! Listener for events that happen to a Value
