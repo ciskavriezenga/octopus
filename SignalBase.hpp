@@ -49,13 +49,16 @@ namespace octo
         /*! The address is invalidated next time someone pulls the signal */
         virtual const void* pull() = 0;
         
+        //! Have all signals that depend on this one disconnect
+        void disconnectDependees();
+        
     public:
-        //! The dependencies of this signal
-        std::set<SignalBase*> dependencies;
+        //! The signals that depend on this signal
+        std::set<SignalBase*> dependees;
         
     private:
-        //! Notify dependencies this signal will be destructed
-        virtual void dependentWillBeDestructed(SignalBase& dependent) { }
+        //! Called when a dependent asks not to depend on it anymore (e.g. it is being destroyed)
+        virtual void disconnectFromDependent(SignalBase& dependent) { }
     };
 }
 
