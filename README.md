@@ -14,6 +14,7 @@ Other features of Octopus include:
 ## Examples
 
 ```
+#include <cmath>
 #include <octo/Signal.hpp>
 #include <octo/Value.hpp>
 
