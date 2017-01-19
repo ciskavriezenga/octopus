@@ -60,24 +60,28 @@ private:
 	long double phase = 0;
 };
 
-
-// Create a clock that represents the audio clock running at 44100 Hertz
-InvariableClock audio(44100);
-
-// Create a sine oscillator that outputs floats and uses the audio clock
-Sine oscillator(audio);
-
-// Set the frequency of the oscillator to 440 + (100 * an lfo at 0.5 Hertz)
-// In other words, set the oscillator to vibrate between 340 and 540 once per 2 seconds
-oscillator.frequency = 440.0f + 100.0f * Sine(audio, 0.5f);
-
-do
+int main(int argc, char* argv[])
 {
-  // Output the current sample of the oscillator (= z^0)
-  std::cout << oscillator() << std::endl;
-  
-// Move the audio clock to its next frame each iteration, up to its hundredth
-} while (audio.tick() < 100);
+	// Create a clock that represents the audio clock running at 44100 Hertz
+	InvariableClock audio(44100);
+
+	// Create a sine oscillator that outputs floats and uses the audio clock
+	Sine oscillator(audio);
+
+	// Set the frequency of the oscillator to 440 + (100 * an lfo at 0.5 Hertz)
+	// In other words, set the oscillator to vibrate between 340 and 540 once per 2 seconds
+	oscillator.frequency = 440.0f + 100.0f * Sine(audio, 0.5f);
+
+	do
+	{
+	  // Output the current sample of the oscillator (= z^0)
+	  std::cout << oscillator() << std::endl;
+
+	// Move the audio clock to its next frame each iteration, up to its hundredth
+	} while (audio.tick() < 100);
+	
+	return 0;
+}
 ```
 
 
