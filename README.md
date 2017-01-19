@@ -38,9 +38,9 @@ class Sine : public Signal<float>
 {
 public:
 	// Take a clock in the constructor and pass it to the base class
-	MySignal(Clock& clock) :
-		Signal<float>(clock),
-		frequency(clock)
+	Sine(Clock& clock) :
+	     Signal<float>(clock),
+	     frequency(clock)
 	{
 
 	}
@@ -50,7 +50,7 @@ public:
 	Value<float> frequency;
 	
 	// Utility macro necessary for each signal
-	GENERATE_MOVE(MySignal)
+	GENERATE_MOVE(Sine)
     
 private:
 	// This function will be called whenever a new sample is needed
