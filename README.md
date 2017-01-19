@@ -15,8 +15,7 @@ Other features of Octopus include:
 
 ```
 #include <cmath>
-#include <octo/Signal.hpp>
-#include <octo/Value.hpp>
+#include <octopus/Octopus.hpp>
 
 using namespace octo;
 
@@ -56,7 +55,7 @@ private:
 ```
 ```
 #include <iostream>
-#include <octo/Clock.hpp>
+#include <octopus/Octopus.hpp>
 
 // Create a clock that represents the audio clock running at 44100 Hertz
 InvariableClock audio(44100);
