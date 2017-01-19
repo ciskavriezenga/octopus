@@ -61,7 +61,7 @@ private:
 InvariableClock audio(44100);
 
 // Create a sine oscillator that outputs floats and uses the audio clock
-Sine<float> oscillator(audio);
+Sine oscillator(audio);
 
 // Set the frequency of the oscillator to 440 + (100 * an lfo at 0.5 Hertz)
 // In other words, set the oscillator to vibrate between 340 and 540 once per 2 seconds
