@@ -15,6 +15,7 @@ Other features of Octopus include:
 
 ```
 #include <cmath>
+#include <iostream>
 #include <octopus/Octopus.hpp>
 
 using namespace octo;
@@ -49,13 +50,16 @@ private:
 		while (phase >= 1.0)
 			phase -= 1.0;
 	}
+	
+	// This function is called when the clock on the signal changes
+	void clockChanged(octo::Clock& clock) final override
+	{
+		frequency.setClock(clock);
+	}
 
 	long double phase = 0;
 };
-```
-```
-#include <iostream>
-#include <octopus/Octopus.hpp>
+
 
 // Create a clock that represents the audio clock running at 44100 Hertz
 InvariableClock audio(44100);
