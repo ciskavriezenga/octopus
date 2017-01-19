@@ -32,17 +32,14 @@
 #define OCTOPUS_OCTOPUS_HPP
 
 #include "Arithmetic.hpp"
+#include "BinaryOperation.hpp"
 #include "Clock.hpp"
-#include "CrossFade.hpp"
-#include "Impulse.hpp"
+#include "Fold.hpp"
 #include "Join.hpp"
-#include "Patch.hpp"
-#include "Product.hpp"
 #include "Sieve.hpp"
 #include "Signal.hpp"
-#include "Sine.hpp"
 #include "Split.hpp"
+#include "UnaryOperation.hpp"
 #include "Value.hpp"
-
 
 #endif

@@ -68,7 +68,7 @@ namespace octo
         
         //! Construct a fold with two terms
         /*! @throw std::runtime_error: If the terms do not share the same clock */
-        Fold(Value<In> lhs, Value<In> rhs) :
+        Fold(Value<In>&& lhs, Value<In>&& rhs) :
             Signal<Out>(lhs.getClock())
         {
             if (&lhs.getClock() != &rhs.getClock())

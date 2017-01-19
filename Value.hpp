@@ -105,30 +105,25 @@ namespace octo
         Value(const Value&) = delete;
         
         //! Moving from a value
-        Value(Value&& rhs) : Signal<T>(rhs.getClock())
+        Value(Value&& rhs) :
+            Signal<T>(rhs.getClock())
         {
             if (&rhs == this)
                 return;
             
-            if (mode != rhs.mode || (isReference() && reference != rhs.reference))
+            switch (mode = rhs.mode)
             {
-                switch ((mode = rhs.mode))
-                {
-                    case ValueMode::CONSTANT:
-                        new (&constant) T(rhs.constant);
-                        notifyConstantSet();
-                        break;
-                    case ValueMode::REFERENCE:
-                        reference = rhs.reference;
-                        notifySignalSet();
-                        break;
-                    case ValueMode::INTERNAL:
-                        new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
-                        notifySignalSet();
-                        break;
-                }
+                case ValueMode::CONSTANT:
+                    new (&constant) T(rhs.constant);
+                    break;
+                case ValueMode::REFERENCE:
+                    reference = rhs.reference;
+                    break;
+                case ValueMode::INTERNAL:
+                    new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
+                    break;
             }
-            
+                        
             rhs.reset();
         }
         
