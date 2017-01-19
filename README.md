@@ -25,9 +25,9 @@ class Sine : public Signal<float>
 {
 public:
 	// Take a clock in the constructor and pass it to the base class
-	Sine(Clock& clock) :
+	Sine(Clock& clock, float frequency = 0.0f) :
 	     Signal<float>(clock),
-	     frequency(clock)
+	     frequency(clock, frequency)
 	{
 
 	}
@@ -55,6 +55,7 @@ private:
 };
 ```
 ```
+#include <iostream>
 #include <octo/Clock.hpp>
 
 // Create a clock that represents the audio clock running at 44100 Hertz
@@ -65,12 +66,12 @@ Sine<float> oscillator(audio);
 
 // Set the frequency of the oscillator to 440 + (100 * an lfo at 0.5 Hertz)
 // In other words, set the oscillator to vibrate between 340 and 540 once per 2 seconds
-oscillator.frequency = 440 + 100 * Sine<float>(audio, 0.5);
+oscillator.frequency = 440.0f + 100.0f * Sine(audio, 0.5f);
 
 do
 {
   // Output the current sample of the oscillator (= z^0)
-  cout << oscillator() << endl;
+  std::cout << oscillator() << std::endl;
   
 // Move the audio clock to its next frame each iteration, up to its hundredth
 } while (audio.tick() < 100);
