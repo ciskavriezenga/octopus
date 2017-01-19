@@ -68,7 +68,7 @@ namespace octo
         
         //! Construct a fold with two terms
         /*! @throw std::runtime_error: If the terms do not share the same clock */
-        Fold(Value<In> lhs, Value<In> rhs) :
+        Fold(Value<In>&& lhs, Value<In>&& rhs) :
             Signal<Out>(lhs.getClock())
         {
             if (&lhs.getClock() != &rhs.getClock())
@@ -126,6 +126,13 @@ namespace octo
         /*! This funtion is called on each input, where the output is given as the first argument to the next call.
             It 'accumulates' all input samples in a single sample of type Out. */
         virtual Out fold(const Out& out, const In& in) const = 0;
+        
+        // Inherited from Signal
+        void clockChanged(Clock& clock) final override
+        {
+            for (auto& input : inputs)
+                input->setClock(clock);
+        }
         
     private:
         //! The inputs to the fold

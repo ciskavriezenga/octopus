@@ -14,10 +14,8 @@ set(HEADERS
     Clock.hpp
     Division.hpp
     Fold.hpp
-    Group.hpp
     Join.hpp
     Negation.hpp
-    Node.hpp
     Octopus.hpp
     Product.hpp
     Sieve.hpp
@@ -30,7 +28,6 @@ set(HEADERS
     Value.hpp)
 
 set(SOURCES
-    Group.cpp
     SignalBase.cpp)
 
 target_sources(octopus PRIVATE ${HEADERS} ${SOURCES})

@@ -104,6 +104,16 @@ namespace octo
             @note This function can only be used on r-value signal objects. */
         virtual std::unique_ptr<Signal> moveToHeap() && = 0;
         
+        //! Change the clock
+        void setClock(Clock& clock, const T& cache = T{})
+        {
+            this->cache = cache;
+            this->clock = &clock;
+            timestamp = clock.now();
+            
+            clockChanged(clock);
+        }
+        
         //! Retrieve the clock this signal runs at
         Clock& getClock() const { return *clock; }
         
@@ -114,6 +124,9 @@ namespace octo
     private:
         //! Generate a new sample
         virtual void generateSample(T& out) = 0;
+        
+        //! The clock changed
+        virtual void clockChanged(Clock& clock) = 0;
         
     private:
         //! The clock this signal runs at

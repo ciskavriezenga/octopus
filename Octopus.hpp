@@ -42,5 +42,4 @@
 #include "UnaryOperation.hpp"
 #include "Value.hpp"
 
-
 #endif

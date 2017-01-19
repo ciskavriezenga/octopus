@@ -26,18 +26,26 @@
  
  */
 
-#include <cassert>
+#include <stdexcept>
 
 #include "SignalBase.hpp"
+
+using namespace std;
 
 namespace octo
 {
     SignalBase::~SignalBase()
     {
-        auto temp = dependencies;
-        for (auto& dependency : temp)
-            dependency->dependentWillBeDestructed(*this);
+        disconnectDependees();
+    }
+    
+    void SignalBase::disconnectDependees()
+    {
+        auto cachedDependees = dependees;
+        for (auto& dependee : cachedDependees)
+            dependee->disconnectFromDependent(*this);
         
-        assert(dependencies.empty());
+        if (!dependees.empty())
+            throw runtime_error("not all dependees disconnected");
     }
 }
