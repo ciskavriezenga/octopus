@@ -88,8 +88,9 @@ namespace octo
         {
             const auto now = clock->now();
             
-            if (timestamp <= now)
+            if (timestamp <= now || !started)
             {
+                started = true;
                 timestamp = now + 1;
                 generateSample(cache);
             }
@@ -138,6 +139,9 @@ namespace octo
         
         //! The timestamp of the next-to-be generated sample
         uint64_t timestamp = 0;
+        
+        //! Has the signal computed its first sample yet (aka is the cache valid?)
+        bool started = false;
     };
     
     // Convenience macro for overriding Signal::move()

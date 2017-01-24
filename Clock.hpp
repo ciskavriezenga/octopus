@@ -56,19 +56,19 @@ namespace octo
     
     //! A clock with an invariable, constant rate
     /*! Clocks are used for keeping time with signals. Each signal compares its internal state
-        with the clock it was given. If it's not up to date, new sample data will be generated.
+     with the clock it was given. If it's not up to date, new sample data will be generated.
      
-        Invariable clocks are the most simple clocks available. You set their rate once, and
-        signals with an invariable clock attached can then request the rate whenever they need it.
-        A good example of a domain with an invariable clock would be audio. Although audio samples
-        are often not actuallt generated every 1/44100 second (they are generated in 'bursts' by the
-        audio callback), audio signals should operate as if the rate between every sample remains constant.
-        That is how they will be *played back* after all. */
+     Invariable clocks are the most simple clocks available. You set their rate once, and
+     signals with an invariable clock attached can then request the rate whenever they need it.
+     A good example of a domain with an invariable clock would be audio. Although audio samples
+     are often not actuallt generated every 1/44100 second (they are generated in 'bursts' by the
+     audio callback), audio signals should operate as if the rate between every sample remains constant.
+     That is how they will be *played back* after all. */
     class InvariableClock : public Clock
     {
     public:
         //! Construct the clock
-        /*! @param rate: The rate at which the clocks runs (changes only with setRate). */
+        /*! @param rateInHertz The rate at which the clocks runs (changes only with setRate). */
         InvariableClock(float rateInHertz) :
             rate_(rateInHertz)
         {
@@ -97,19 +97,19 @@ namespace octo
     
     //! A clock with a variable sample rate
     /*! Clocks are used for keeping time with signals. Each signal compares its internal state
-        with the clock it was given. If it's not up to date, new sample data will be generated.
+     with the clock it was given. If it's not up to date, new sample data will be generated.
      
-        Variable clocks automatically change their rate every time tick() is called, depending
-        on the elapsed time since the previous tick. A good example of a domain with a variable
-        clock would be video. The FPS (rate) in video applications changes every frame (some ticks
-        take longer than others). Signals attached to variable clocks can request the rate or
-        delta every frame anew and make sure they update themselves according to how much time the
-        last tick took. */
+     Variable clocks automatically change their rate every time tick() is called, depending
+     on the elapsed time since the previous tick. A good example of a domain with a variable
+     clock would be video. The FPS (rate) in video applications changes every frame (some ticks
+     take longer than others). Signals attached to variable clocks can request the rate or
+     delta every frame anew and make sure they update themselves according to how much time the
+     last tick took. */
     class VariableClock : public Clock
     {
     public:
         //! Construct the clock
-        /*! @param startingRate: The rate at which the clocks starts running (will be influenced by subsequent ticks) */
+        /*! @param startingRateInHertz The rate at which the clocks starts running (will be influenced by subsequent ticks) */
         VariableClock(float startingRateInHertz) :
             rate_(startingRateInHertz)
         {
