@@ -49,7 +49,7 @@ namespace octo
     {
     public:
         //! Construct an empty fold
-        Fold(Clock& clock) : Signal<Out>(clock) { }
+        Fold(Clock& clock, const Out& initialCache = Out{}) : Signal<Out>(clock, initialCache) { }
         
         //! Construct an empty fold
         Fold(Clock& clock, std::size_t size) :

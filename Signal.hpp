@@ -71,8 +71,9 @@ namespace octo
     {
     public:
         //! Construct the signal
-        Signal(Clock& clock) :
+        Signal(Clock& clock, const T& initialCache = T{}) :
             clock(&clock),
+            cache(initialCache),
             timestamp(clock.now())
         {
             

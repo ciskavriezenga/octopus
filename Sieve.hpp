@@ -44,8 +44,8 @@ namespace octo
     {
     public:
         //! Create the sieve by passing the channel
-        Sieve(Clock& clock, unsigned int channel = 0) :
-            UnaryOperation<std::vector<T>, T>(clock),
+        Sieve(Clock& clock, unsigned int channel = 0, const T& initialCache = T{}) :
+            UnaryOperation<std::vector<T>, T>(clock, initialCache),
             channel(channel)
         {
             

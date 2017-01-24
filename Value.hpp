@@ -77,10 +77,10 @@ namespace octo
         
     public:
         //! Construct a value with constant value
-        Value(Clock& clock, const T& constant = {}) : Signal<T>(clock), mode(ValueMode::CONSTANT), constant(constant) { }
+        Value(Clock& clock, const T& constant = T{}) : Signal<T>(clock, constant), mode(ValueMode::CONSTANT), constant(constant) { }
         
         //! Construct a value referencing another signal
-        Value(Clock& clock, Signal<T>& reference) : Signal<T>(clock), mode(ValueMode::REFERENCE), reference(&reference) { }
+        Value(Clock& clock, Signal<T>& reference) : Signal<T>(clock, reference()), mode(ValueMode::REFERENCE), reference(&reference) { }
         
         //! Construct a value referencing another signal
         Value(Signal<T>& reference) : Value(reference.getClock(), reference) { }
@@ -90,13 +90,13 @@ namespace octo
         Value(Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Construct a value owning an internal signal
-        Value(Clock& clock, Signal<T>&& internal) : Signal<T>(clock), mode(ValueMode::INTERNAL), internal(std::move(internal).moveToHeap()) { }
+        Value(Clock& clock, Signal<T>&& internal) : Signal<T>(clock, internal()), mode(ValueMode::INTERNAL), internal(std::move(internal).moveToHeap()) { }
         
         //! Construct a value owning an internal signal
         Value(Signal<T>&& internal) : Value(internal.getClock(), std::move(internal)) { }
         
         //! Construct a value owning an internal signal
-        Value(Clock& clock, std::unique_ptr<Signal<T>> internal) : Signal<T>(clock), mode(ValueMode::INTERNAL), internal(std::move(internal)) { }
+        Value(Clock& clock, std::unique_ptr<Signal<T>> internal) : Signal<T>(clock, (*internal)()), mode(ValueMode::INTERNAL), internal(std::move(internal)) { }
         
         //! Construct a value owning an internal signal
         Value(std::unique_ptr<Signal<T>> internal) : Value(internal->getClock(), std::move(internal)) { }
@@ -106,7 +106,7 @@ namespace octo
         
         //! Moving from a value
         Value(Value&& rhs) :
-            Signal<T>(rhs.getClock())
+            Signal<T>(rhs.getClock(), rhs())
         {
             if (&rhs == this)
                 return;

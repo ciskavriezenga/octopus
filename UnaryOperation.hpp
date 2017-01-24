@@ -40,8 +40,8 @@ namespace octo
     {
     public:
         //! Construct an empty unary operation
-        UnaryOperation(Clock& clock) :
-            Signal<Out>(clock),
+        UnaryOperation(Clock& clock, const Out& initialCache = Out{}) :
+            Signal<Out>(clock, initialCache),
             input(clock)
         {
             
