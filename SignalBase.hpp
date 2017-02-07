@@ -47,7 +47,7 @@ namespace octo
         
         //! Pull and retrieve the type-agnostic address of a sample
         /*! The address is invalidated next time someone pulls the signal */
-        virtual const void* pull() = 0;
+        virtual const void* pullGeneric() = 0;
         
         //! Have all signals that depend on this one disconnect
         void disconnectDependees();

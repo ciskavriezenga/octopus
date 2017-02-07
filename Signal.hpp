@@ -98,6 +98,10 @@ namespace octo
             return cache;
         }
         
+        //! Retrieve a signal of the sample, relative to the its clock's current timestamp
+        /*! @return A reference to the generated sample in cache. Copy and be done with it, this could change with each call */
+        const T& pull() { return operator()(); }
+        
         //! Return the current sample of the signal
         explicit operator T() { return (*this)(); }
         
@@ -121,7 +125,7 @@ namespace octo
         
         // Inherited from SignalBase
         const std::type_info& getTypeInfo() const final override { return typeid(T); }
-        const void* pull() final override { return &(*this)(); }
+        const void* pullGeneric() final override { return &(*this)(); }
         
     private:
         //! Generate a new sample
