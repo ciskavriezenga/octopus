@@ -28,7 +28,6 @@
 
 #include <stdexcept>
 
-#include "Clock.hpp"
 #include "SignalBase.hpp"
 
 using namespace std;
@@ -36,8 +35,7 @@ using namespace std;
 namespace octo
 {
     SignalBase::SignalBase(Clock& clock) :
-        clock(&clock),
-        timestamp(clock.now())
+        Sink(clock)
     {
         
     }
@@ -55,26 +53,5 @@ namespace octo
         
         if (!dependees.empty())
             throw runtime_error("not all dependees disconnected");
-    }
-    
-    void SignalBase::setClock(Clock& clock)
-    {
-        this->clock = &clock;
-        timestamp = clock.now();
-        
-        clockChanged(clock);
-    }
-    
-    void SignalBase::setPersistency(bool persistent)
-    {
-        if (persistent)
-            clock->addPersistentSignal(*this);
-        else
-            clock->removePersistentSignal(*this);
-    }
-    
-    bool SignalBase::isPersistent() const
-    {
-        return clock->isSignalPersistent(*this);
     }
 }

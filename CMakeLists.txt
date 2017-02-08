@@ -21,6 +21,7 @@ set(HEADERS
 	Sieve.hpp
 	Signal.hpp
 	SignalBase.hpp
+    Sink.hpp
 	Split.hpp
 	Subtraction.hpp
 	Sum.hpp
@@ -28,7 +29,8 @@ set(HEADERS
 	Value.hpp)
 
 set(SOURCES
-    SignalBase.cpp)
+    SignalBase.cpp
+    Sink.cpp)
 
 target_sources(octopus PRIVATE ${HEADERS} ${SOURCES})
 source_group(\\ FILES ${HEADERS} ${SOURCES})

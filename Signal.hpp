@@ -85,15 +85,7 @@ namespace octo
         /*! @return A reference to the generated sample in cache. Copy and be done with it, this could change with each call */
         const T& operator()()
         {
-            const auto now = clock->now();
-            
-            if (timestamp <= now || !started)
-            {
-                started = true;
-                timestamp = now + 1;
-                generateSample(cache);
-            }
-            
+            update(); // Update the signal as a sink
             return cache;
         }
         
@@ -117,12 +109,12 @@ namespace octo
         //! Generate a new sample
         virtual void generateSample(T& out) = 0;
         
+        // Inherited from Sink
+        void onUpdate() final override { generateSample(cache); }
+        
     private:
         //! A cache for previously generated samples
         T cache = T{};
-        
-        //! Has the signal computed its first sample yet (aka is the cache valid?)
-        bool started = false;
     };
     
     // Convenience macro for overriding Signal::move()

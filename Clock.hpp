@@ -33,7 +33,7 @@
 #include <cstdint>
 #include <set>
 
-#include "SignalBase.hpp"
+#include "Sink.hpp"
 
 namespace octo
 {
@@ -55,8 +55,8 @@ namespace octo
         {
             onTick();
             
-            for (auto& signal : persistentSignals)
-                signal->pullGeneric();
+            for (auto& sink : persistentSinks)
+                sink->update();
             
             return now();
         }
@@ -65,21 +65,21 @@ namespace octo
         virtual uint64_t now() const = 0;
         
         //! Add a signal as persistent
-        void addPersistentSignal(SignalBase& signal) { persistentSignals.emplace(&signal); }
+        void addPersistentSink(Sink& sink) { persistentSinks.emplace(&sink); }
         
         //! Remove a signal as persistent
-        void removePersistentSignal(SignalBase& signal) { persistentSignals.erase(&signal); }
+        void removePersistentSink(Sink& sink) { persistentSinks.erase(&sink); }
         
         //! Is a signal persistent for this clock?
-        bool isSignalPersistent(const SignalBase& signal) const { return persistentSignals.count(const_cast<SignalBase*>(&signal)); }
+        bool isSinkPersistent(const Sink& sink) const { return persistentSinks.count(const_cast<Sink*>(&sink)); }
         
     private:
         //! Move the clock to its next time index
         virtual void onTick() = 0;
         
     private:
-        //! The signals that will be pulled with each tick
-        std::set<SignalBase*> persistentSignals;
+        //! The sinks that will be updated with each tick
+        std::set<Sink*> persistentSinks;
     };
     
     //! A clock with an invariable, constant rate
