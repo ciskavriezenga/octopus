@@ -35,10 +35,15 @@
 
 namespace octo
 {
+    class Clock;
+    
     //! Base class for all signals in Octopus, regardless of their output type
     class SignalBase
     {
     public:
+        //! Construct the signal base
+        SignalBase(Clock& clock);
+        
         //! Virtual destructor, because this is a polymorphic base class
         virtual ~SignalBase();
         
@@ -52,11 +57,33 @@ namespace octo
         //! Have all signals that depend on this one disconnect
         void disconnectDependees();
         
+        //! Change the clock
+        void setClock(Clock& clock);
+        
+        //! Retrieve the clock this signal runs at
+        Clock& getClock() const { return *clock; }
+        
+        //! Make this signal persistent
+        void setPersistency(bool persistent);
+        
+        //! Is this clock persistent?
+        bool isPersistent() const;
+        
     public:
         //! The signals that depend on this signal
         std::set<SignalBase*> dependees;
         
+    protected:
+        //! The clock this signal runs at
+        Clock* clock = nullptr;
+        
+        //! The timestamp of the next-to-be generated sample
+        uint64_t timestamp = 0;
+        
     private:
+        //! The clock changed
+        virtual void clockChanged(Clock& clock) = 0;
+        
         //! Called when a dependent asks not to depend on it anymore (e.g. it is being destroyed)
         virtual void disconnectFromDependent(SignalBase& dependent) { }
     };

@@ -31,6 +31,9 @@
 
 #include <chrono>
 #include <cstdint>
+#include <set>
+
+#include "SignalBase.hpp"
 
 namespace octo
 {
@@ -47,11 +50,36 @@ namespace octo
         //! Return the delta between ticks (in seconds)
         virtual float delta() const { return 1.0 / rate(); }
         
-        //! Move the clock to its next time index
-        virtual uint64_t tick() = 0;
+        //! Tick the clock
+        uint64_t tick()
+        {
+            onTick();
+            
+            for (auto& signal : persistentSignals)
+                signal->pullGeneric();
+            
+            return now();
+        }
         
         //! Return the clocks current time index
         virtual uint64_t now() const = 0;
+        
+        //! Add a signal as persistent
+        void addPersistentSignal(SignalBase& signal) { persistentSignals.emplace(&signal); }
+        
+        //! Remove a signal as persistent
+        void removePersistentSignal(SignalBase& signal) { persistentSignals.erase(&signal); }
+        
+        //! Is a signal persistent for this clock?
+        bool isSignalPersistent(const SignalBase& signal) const { return persistentSignals.count(const_cast<SignalBase*>(&signal)); }
+        
+    private:
+        //! Move the clock to its next time index
+        virtual void onTick() = 0;
+        
+    private:
+        //! The signals that will be pulled with each tick
+        std::set<SignalBase*> persistentSignals;
     };
     
     //! A clock with an invariable, constant rate
@@ -81,11 +109,12 @@ namespace octo
         //! Return the rate at which the clock runs (in Hertz)
         float rate() const final override { return rate_; }
         
-        //! Move the clock to its next time index
-        uint64_t tick() final override { return ++timestamp; }
-        
         //! Return the clocks current time index
         uint64_t now() const final override { return timestamp; }
+        
+    private:
+        //! Move the clock to its next time index
+        void onTick() final override { ++timestamp; }
         
     private:
         //! The rate at which the clock runs
@@ -119,18 +148,19 @@ namespace octo
         //! Return the rate at which the clock runs (in Hertz)
         float rate() const final override { return rate_; }
         
+        //! Return the clocks current time index
+        uint64_t now() const final override { return timestamp; }
+        
+    private:
         //! Move the clock to its next time index
-        uint64_t tick() final override
+        void onTick() final override
         {
             auto now = std::chrono::high_resolution_clock::now();
             rate_ = 1.0 / std::chrono::duration_cast<std::chrono::duration<double>>(now - lastNow).count();
             lastNow = now;
             
-            return ++timestamp;
+            ++timestamp;
         }
-        
-        //! Return the clocks current time index
-        uint64_t now() const final override { return timestamp; }
         
     private:
         //! The rate at which the clock currently runs

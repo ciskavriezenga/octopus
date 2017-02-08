@@ -72,9 +72,8 @@ namespace octo
     public:
         //! Construct the signal
         Signal(Clock& clock, const T& initialCache = T{}) :
-            clock(&clock),
-            cache(initialCache),
-            timestamp(clock.now())
+            SignalBase(clock),
+            cache(initialCache)
         {
             
         }
@@ -110,19 +109,6 @@ namespace octo
             @note This function can only be used on r-value signal objects. */
         virtual std::unique_ptr<Signal> moveToHeap() && = 0;
         
-        //! Change the clock
-        void setClock(Clock& clock, const T& cache = T{})
-        {
-            this->cache = cache;
-            this->clock = &clock;
-            timestamp = clock.now();
-            
-            clockChanged(clock);
-        }
-        
-        //! Retrieve the clock this signal runs at
-        Clock& getClock() const { return *clock; }
-        
         // Inherited from SignalBase
         const std::type_info& getTypeInfo() const final override { return typeid(T); }
         const void* pullGeneric() final override { return &(*this)(); }
@@ -131,18 +117,9 @@ namespace octo
         //! Generate a new sample
         virtual void generateSample(T& out) = 0;
         
-        //! The clock changed
-        virtual void clockChanged(Clock& clock) = 0;
-        
     private:
-        //! The clock this signal runs at
-        Clock* clock = nullptr;
-        
         //! A cache for previously generated samples
         T cache = T{};
-        
-        //! The timestamp of the next-to-be generated sample
-        uint64_t timestamp = 0;
         
         //! Has the signal computed its first sample yet (aka is the cache valid?)
         bool started = false;
