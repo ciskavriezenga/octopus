@@ -33,8 +33,15 @@ namespace octo
     
     void Sink::setClock(Clock& clock)
     {
+        bool persistent = isPersistent();
+        if (persistent)
+            this->clock->removePersistentSink(*this);
+        
         this->clock = &clock;
         timestamp = clock.now();
+        
+        if (persistent)
+            this->clock->addPersistentSink(*this);
         
         clockChanged(clock);
     }
