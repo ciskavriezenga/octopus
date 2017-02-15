@@ -51,14 +51,14 @@ namespace octo
     public:
         //! Construct the split
         /*! size The amount of sieves in the split */
-        Split(Clock& clock, std::size_t size = 0) :
+        Split(Clock* clock, std::size_t size = 0) :
             input(clock)
         {
             resize(size);
         }
         
         //! Construct the split by providing size and input
-        Split(Clock& clock, Value<std::vector<T>> input, std::size_t size) :
+        Split(Clock* clock, Value<std::vector<T>> input, std::size_t size) :
             input(clock, std::move(input))
         {
             resize(size);
@@ -81,7 +81,11 @@ namespace octo
             
             // Add sieves if we're upsizing
             for (auto i = oldSize; i < size; ++i)
-                sieves[i] = std::make_unique<Sieve<T>>(input, i);
+            {
+                auto sieve = std::make_unique<Sieve<T>>(input.getClock(), i);
+                sieve->input = input;
+                sieves[i] = std::move(sieve);
+            }
         }
         
         //! Retrieve the size of the split
@@ -91,7 +95,7 @@ namespace octo
         Sieve<T>& operator[](std::size_t index) { return *sieves.at(index); }
         
         //! Change the clock of all sieves
-        void setClock(Clock& clock)
+        void setClock(Clock* clock)
         {
             for (auto& sieve : sieves)
                 sieve->setClock(clock);

@@ -42,7 +42,7 @@ namespace octo
     {
     public:
         //! Construct an empty binary operation
-        BinaryOperation(Clock& clock, const T& initialCache = T{}) :
+        BinaryOperation(Clock* clock, const T& initialCache = T{}) :
             Signal<T>(clock, initialCache),
             left(clock),
             right(clock)
@@ -51,7 +51,7 @@ namespace octo
         }
         
         //! Construct the binary operation with two terms and its own clock
-        BinaryOperation(Clock& clock, Value<T> left, Value<T> right) :
+        BinaryOperation(Clock* clock, Value<T> left, Value<T> right) :
             Signal<T>(clock),
             left(std::move(left)),
             right(std::move(right))
@@ -85,7 +85,7 @@ namespace octo
         virtual void combineSamples(const T& left, const T& right, T& out) = 0;
         
         // Inherited from Signal
-        void clockChanged(Clock& clock) final override
+        void clockChanged(Clock* clock) final override
         {
             left.setClock(clock);
             right.setClock(clock);

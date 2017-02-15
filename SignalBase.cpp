@@ -34,7 +34,7 @@ using namespace std;
 
 namespace octo
 {
-    SignalBase::SignalBase(Clock& clock) :
+    SignalBase::SignalBase(Clock* clock) :
         Sink(clock)
     {
         

@@ -49,17 +49,17 @@ namespace octo
     {
     public:
         //! Construct an empty fold
-        Fold(Clock& clock, const Out& initialCache = Out{}) : Signal<Out>(clock, initialCache) { }
+        Fold(Clock* clock, const Out& initialCache = Out{}) : Signal<Out>(clock, initialCache) { }
         
         //! Construct an empty fold
-        Fold(Clock& clock, std::size_t size) :
+        Fold(Clock* clock, std::size_t size) :
             Signal<Out>(clock)
         {
             resize(size);
         }
         
         //! Construct a fold with two terms and a clock
-        Fold(Clock& clock, Value<In> lhs, Value<In> rhs) :
+        Fold(Clock* clock, Value<In> lhs, Value<In> rhs) :
             Signal<Out>(clock)
         {
             this->emplace(std::move(lhs));
@@ -128,7 +128,7 @@ namespace octo
         virtual Out fold(const Out& out, const In& in) const = 0;
         
         // Inherited from Signal
-        void clockChanged(Clock& clock) final override
+        void clockChanged(Clock* clock) final override
         {
             for (auto& input : inputs)
                 input->setClock(clock);

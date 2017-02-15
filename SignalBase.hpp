@@ -41,7 +41,7 @@ namespace octo
     {
     public:
         //! Construct the signal base
-        SignalBase(Clock& clock);
+        SignalBase(Clock* clock);
         
         //! Virtual destructor, because this is a polymorphic base class
         virtual ~SignalBase();

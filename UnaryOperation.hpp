@@ -40,7 +40,7 @@ namespace octo
     {
     public:
         //! Construct an empty unary operation
-        UnaryOperation(Clock& clock, const Out& initialCache = Out{}) :
+        UnaryOperation(Clock* clock, const Out& initialCache = Out{}) :
             Signal<Out>(clock, initialCache),
             input(clock)
         {
@@ -48,7 +48,7 @@ namespace octo
         }
         
         //! Construct the unary operation with its input
-        UnaryOperation(Clock& clock, Value<In> input) :
+        UnaryOperation(Clock* clock, Value<In> input) :
             Signal<Out>(clock),
             input(std::move(input))
         {
@@ -68,7 +68,7 @@ namespace octo
         
     private:
         // Inherited from Signal
-        void clockChanged(Clock& clock) final override
+        void clockChanged(Clock* clock) final override
         {
             input.setClock(clock);
         }

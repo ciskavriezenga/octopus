@@ -20,7 +20,7 @@ namespace octo
     {
     public:
         //! Construct the sink by specifying the clock to which it will listen
-        Sink(Clock& clock);
+        Sink(Clock* clock);
         
         //! Virtual destructor, because this is a polymorphic base class
         virtual ~Sink() = default;
@@ -29,16 +29,23 @@ namespace octo
         void update();
         
         //! Change the clock
-        void setClock(Clock& clock);
+        void setClock(Clock* clock);
         
         //! Retrieve the clock this sink runs at
-        Clock& getClock() const { return *clock; }
+        Clock* getClock() const { return clock; }
         
         //! Make this sink persistent
         void setPersistency(bool persistent);
         
         //! Is this sink persistent?
         bool isPersistent() const;
+        
+    protected:
+        //! Return the current rate of the clock
+        float rate() const;
+        
+        //! Return the current delta of the clock
+        float delta() const;
         
     protected:
         //! The clock this sink runs at
@@ -52,7 +59,7 @@ namespace octo
         virtual void onUpdate() = 0;
         
         //! The clock changed
-        virtual void clockChanged(Clock& clock) = 0;
+        virtual void clockChanged(Clock* clock) = 0;
         
     private:
         //! Has the sink done its first update yet?

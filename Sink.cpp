@@ -11,15 +11,18 @@
 
 namespace octo
 {
-    Sink::Sink(Clock& clock) :
-        clock(&clock),
-        timestamp(clock.now())
+    Sink::Sink(Clock* clock) :
+        clock(clock)
     {
-        
+        if (clock)
+            timestamp = clock->now();
     }
     
     void Sink::update()
     {
+        if (!clock)
+            return onUpdate();
+        
         const auto now = clock->now();
         
         // Do we need updating?
@@ -31,16 +34,20 @@ namespace octo
         onUpdate();
     }
     
-    void Sink::setClock(Clock& clock)
+    void Sink::setClock(Clock* clock)
     {
+        if (clock == this->clock)
+            return;
+        
         bool persistent = isPersistent();
-        if (persistent)
+        if (persistent && this->clock)
             this->clock->removePersistentSink(*this);
         
-        this->clock = &clock;
-        timestamp = clock.now();
+        this->clock = clock;
+        if (clock)
+            timestamp = clock->now();
         
-        if (persistent)
+        if (persistent && clock)
             this->clock->addPersistentSink(*this);
         
         clockChanged(clock);
@@ -48,6 +55,9 @@ namespace octo
     
     void Sink::setPersistency(bool persistent)
     {
+        if (!clock)
+            return;
+        
         if (persistent)
             clock->addPersistentSink(*this);
         else
@@ -56,6 +66,16 @@ namespace octo
     
     bool Sink::isPersistent() const
     {
-        return clock->isSinkPersistent(*this);
+        return clock ? clock->isSinkPersistent(*this) : false;
+    }
+    
+    float Sink::rate() const
+    {
+        return clock ? clock->rate() : 0;
+    }
+    
+    float Sink::delta() const
+    {
+        return clock ? clock->delta() : 0;
     }
 }
