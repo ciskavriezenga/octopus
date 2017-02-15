@@ -97,7 +97,7 @@ namespace octo
             inputs.resize(size);
             
             for (auto i = oldSize; i < size; ++i)
-                inputs[i] = std::make_unique<Value<In>>(this->getClock());
+                inputs[i] = std::make_unique<Value<In>>();
         }
         
         //! Retrieve one of the inputs

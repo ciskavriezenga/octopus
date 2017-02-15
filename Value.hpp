@@ -77,20 +77,17 @@ namespace octo
         
     public:
         //! Construct a value with constant value
-        Value(Clock* clock, const T& constant = T{}) : Signal<T>(nullptr, constant), mode(ValueMode::CONSTANT), constant(constant) { }
+        Value(const T& constant = T{}) : Signal<T>(nullptr, constant), mode(ValueMode::CONSTANT), constant(constant) { }
         
         //! Construct a value referencing another signal
         Value(Signal<T>& reference) : Value(reference.getClock(), reference) { }
         
         //! Reference another Value
         /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
-        Value(Value* reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
+        Value(Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Construct a value owning an internal signal
         Value(Signal<T>&& internal) : Value(internal.getClock(), std::move(internal)) { }
-        
-        //! Construct a value owning an internal signal
-        Value(Clock* clock, std::unique_ptr<Signal<T>> internal) : Signal<T>(clock, (*internal)()), mode(ValueMode::INTERNAL), internal(std::move(internal)) { }
         
         //! Construct a value owning an internal signal
         Value(std::unique_ptr<Signal<T>> internal) : Value(internal->getClock(), std::move(internal)) { }

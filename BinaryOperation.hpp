@@ -43,18 +43,14 @@ namespace octo
     public:
         //! Construct an empty binary operation
         BinaryOperation(Clock* clock, const T& initialCache = T{}) :
-            Signal<T>(clock, initialCache),
-            left(clock),
-            right(clock)
+            Signal<T>(clock, initialCache)
         {
             
         }
         
         //! Construct the binary operation with two terms and its own clock
         BinaryOperation(Clock* clock, Value<T> left, Value<T> right) :
-            Signal<T>(clock),
-            left(std::move(left)),
-            right(std::move(right))
+            Signal<T>(clock)
         {
             
         }
