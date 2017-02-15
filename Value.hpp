@@ -77,10 +77,7 @@ namespace octo
         
     public:
         //! Construct a value with constant value
-        Value(Clock* clock, const T& constant = T{}) : Signal<T>(clock, constant), mode(ValueMode::CONSTANT), constant(constant) { }
-        
-        //! Construct a value referencing another signal
-        Value(Clock* clock, Signal<T>& reference) : Signal<T>(clock, reference()), mode(ValueMode::REFERENCE), reference(&reference) { }
+        Value(Clock* clock, const T& constant = T{}) : Signal<T>(nullptr, constant), mode(ValueMode::CONSTANT), constant(constant) { }
         
         //! Construct a value referencing another signal
         Value(Signal<T>& reference) : Value(reference.getClock(), reference) { }
@@ -88,9 +85,6 @@ namespace octo
         //! Reference another Value
         /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
         Value(Value* reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
-        
-        //! Construct a value owning an internal signal
-        Value(Clock* clock, Signal<T>&& internal) : Signal<T>(clock, internal()), mode(ValueMode::INTERNAL), internal(std::move(internal).moveToHeap()) { }
         
         //! Construct a value owning an internal signal
         Value(Signal<T>&& internal) : Value(internal.getClock(), std::move(internal)) { }
@@ -106,7 +100,7 @@ namespace octo
         
         //! Moving from a value
         Value(Value&& rhs) :
-            Signal<T>(rhs.getClock(), rhs())
+            Signal<T>(nullptr, rhs())
         {
             if (&rhs == this)
                 return;
@@ -118,9 +112,11 @@ namespace octo
                     break;
                 case ValueMode::REFERENCE:
                     reference = rhs.reference;
+                    setClock(reference->getClock());
                     break;
                 case ValueMode::INTERNAL:
                     new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
+                    setClock(internal->getClock());
                     break;
             }
                         
@@ -139,6 +135,7 @@ namespace octo
                 
                 mode = ValueMode::CONSTANT;
                 new (&this->constant) T(constant);
+                setClock(nullptr);
             }
             
             notifyConstantSet();
@@ -160,6 +157,7 @@ namespace octo
                 new (&this->reference) Signal<T>*(&reference);
                 
                 reference.dependees.emplace(this);
+                setClock(reference.getClock());
             }
             
             notifySignalSet();
@@ -185,6 +183,7 @@ namespace octo
                 
                 mode = ValueMode::INTERNAL;
                 new (&this->internal) std::unique_ptr<Signal<T>>(std::move(internal));
+                setClock(internal->getClock());
             }
             
             notifySignalSet();
@@ -209,9 +208,9 @@ namespace octo
                 deconstruct();
                 switch ((mode = rhs.mode))
                 {
-                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); break;
-                    case ValueMode::REFERENCE: reference = rhs.reference; break;
-                    case ValueMode::INTERNAL: new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal)); break;
+                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); setClock(nullptr); break;
+                    case ValueMode::REFERENCE: reference = rhs.reference; setClock(rhs.reference); break;
+                    case ValueMode::INTERNAL: new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal)); setClock(internal->getClock()); break;
                 }
             }
             
@@ -276,6 +275,8 @@ namespace octo
         std::set<Listener*> listeners;
         
     private:
+        using Sink::setClock;
+                              
         //! Deconstructs what's in the union
         /*! Internal use only. A new construction should take place immediately afterwards */
         void deconstruct()
@@ -306,9 +307,6 @@ namespace octo
                 case ValueMode::INTERNAL: out = (*internal)(); break;
             }
         }
-        
-        // Inherited from Signal
-        void clockChanged(Clock* clock) final override { }
         
         //! Reset the value, because the referenced signal will be destructed
         void disconnectFromDependent(SignalBase& dependent) final override

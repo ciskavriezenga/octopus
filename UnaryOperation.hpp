@@ -65,13 +65,6 @@ namespace octo
     public:
         //! The input to the operation
         Value<In> input;
-        
-    private:
-        // Inherited from Signal
-        void clockChanged(Clock* clock) final override
-        {
-            input.setClock(clock);
-        }
     };
 }
 

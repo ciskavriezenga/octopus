@@ -59,7 +59,7 @@ namespace octo
         virtual void onUpdate() = 0;
         
         //! The clock changed
-        virtual void clockChanged(Clock* clock) = 0;
+        virtual void clockChanged(Clock* clock) { }
         
     private:
         //! Has the sink done its first update yet?

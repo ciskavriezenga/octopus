@@ -127,13 +127,6 @@ namespace octo
             It 'accumulates' all input samples in a single sample of type Out. */
         virtual Out fold(const Out& out, const In& in) const = 0;
         
-        // Inherited from Signal
-        void clockChanged(Clock* clock) final override
-        {
-            for (auto& input : inputs)
-                input->setClock(clock);
-        }
-        
     private:
         //! The inputs to the fold
         std::vector<std::unique_ptr<Value<In>>> inputs;

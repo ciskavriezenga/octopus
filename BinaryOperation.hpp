@@ -83,13 +83,6 @@ namespace octo
         
         //! Combine two samples into a new one
         virtual void combineSamples(const T& left, const T& right, T& out) = 0;
-        
-        // Inherited from Signal
-        void clockChanged(Clock* clock) final override
-        {
-            left.setClock(clock);
-            right.setClock(clock);
-        }
     };
 }
 
