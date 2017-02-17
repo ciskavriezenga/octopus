@@ -49,6 +49,8 @@ namespace octo
         // Change the clock
         this->clock = clock;
         
+        const auto listeners = sinkListeners;
+        
         // If we've moved to a new clock (instead of no clock at all), set some data
         if (clock)
         {
@@ -59,13 +61,13 @@ namespace octo
         } else if (persistent) {
             // If we didn't move to a new clock, and lost persistency, let derivatives and listeners know
             persistencyChanged(false);
-            for (auto& listener : sinkListeners)
+            for (auto& listener : listeners)
                 listener->persistencyChanged(false);
         }
         
         // Let derivatives and listeners know we moved to a new clock
         clockChanged(clock);
-        for (auto& listener : sinkListeners)
+        for (auto& listener : listeners)
             listener->clockChanged(clock);
     }
     
@@ -84,7 +86,8 @@ namespace octo
         
         // Let derivatives and listeners know
         persistencyChanged(persistent);
-        for (auto& listener : sinkListeners)
+        const auto listeners = sinkListeners;
+        for (auto& listener : listeners)
             listener->persistencyChanged(persistent);
     }
     
