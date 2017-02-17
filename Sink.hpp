@@ -67,7 +67,7 @@ namespace octo
         virtual void onUpdate() = 0;
         
         //! The clock changed
-        virtual void clockChanged(const Clock* clock) { }
+        virtual void clockChanged(Clock* clock) { }
         
         //! The persistency changed
         virtual void persistencyChanged(bool persistent) { }
@@ -80,12 +80,15 @@ namespace octo
     //! A listener for sink events
     class Sink::Listener
     {
+        friend class Sink;
+        
     public:
         //! Virtual destructor, because this is a polymorphic class
         virtual ~Listener() = default;
         
+    protected:
         //! Let the listener know the clock of a sink changed
-        virtual void clockChanged(const Clock* clock) { }
+        virtual void clockChanged(Clock* clock) { }
         
         //! Let the listener know the persistency of a sink changed
         virtual void persistencyChanged(bool persistent) { }
