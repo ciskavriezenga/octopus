@@ -10,6 +10,7 @@
 #define OCTOPUS_SINK_HPP
 
 #include <cstdint>
+#include <set>
 
 namespace octo
 {
@@ -18,6 +19,9 @@ namespace octo
     //! Anything that needs updating according to a clock
     class Sink
     {
+    public:
+        class Listener;
+        
     public:
         //! Construct the sink by specifying the clock to which it will listen
         Sink(Clock* clock);
@@ -40,6 +44,10 @@ namespace octo
         //! Is this sink persistent?
         bool isPersistent() const;
         
+    public:
+        //! Listeners for changes to this sink
+        std::set<Listener*> sinkListeners;
+        
     protected:
         //! Return the current rate of the clock
         float rate() const;
@@ -59,11 +67,28 @@ namespace octo
         virtual void onUpdate() = 0;
         
         //! The clock changed
-        virtual void clockChanged(Clock* clock) { }
+        virtual void clockChanged(const Clock* clock) { }
+        
+        //! The persistency changed
+        virtual void persistencyChanged(bool persistent) { }
         
     private:
         //! Has the sink done its first update yet?
         bool started = false;
+    };
+    
+    //! A listener for sink events
+    class Sink::Listener
+    {
+    public:
+        //! Virtual destructor, because this is a polymorphic class
+        virtual ~Listener() = default;
+        
+        //! Let the listener know the clock of a sink changed
+        virtual void clockChanged(const Clock* clock) { }
+        
+        //! Let the listener know the persistency of a sink changed
+        virtual void persistencyChanged(bool persistent) { }
     };
 }
 
