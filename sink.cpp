@@ -26,6 +26,8 @@
  
  */
 
+#include <stdexcept>
+
 #include "clock.hpp"
 #include "sink.hpp"
 
@@ -59,31 +61,54 @@ namespace octo
         if (clock == this->clock)
             return;
         
+        // If we're persistent with the current clock, make the sink non-persistent
         bool persistent = isPersistent();
         if (persistent && this->clock)
             this->clock->removePersistentSink(*this);
         
+        // Change the clock
         this->clock = clock;
+        
+        const auto listeners = sinkListeners;
+        
+        // If we've moved to a new clock (instead of no clock at all), set some data
         if (clock)
         {
             timestamp = clock->now();
-        
+            
             if (persistent)
                 this->clock->addPersistentSink(*this);
+        } else if (persistent) {
+            // If we didn't move to a new clock, and lost persistency, let derivatives and listeners know
+            persistencyChanged(false);
+            for (auto& listener : listeners)
+                listener->persistencyChanged(false);
         }
-        
+    
+        // Let derivatives and listeners know we moved to a new clock
         clockChanged(clock);
+        for (auto& listener : listeners)
+            listener->clockChanged(clock);
     }
     
     void Sink::setPersistency(bool persistent)
     {
         if (!clock)
+            throw std::runtime_error("sink without clocks can't have their persistency set");
+        
+        if (persistent == isPersistent())
             return;
         
         if (persistent)
             clock->addPersistentSink(*this);
         else
             clock->removePersistentSink(*this);
+        
+        // Let derivatives and listeners know
+        persistencyChanged(persistent);
+        const auto listeners = sinkListeners;
+        for (auto& listener : listeners)
+            listener->persistencyChanged(persistent);
     }
     
     bool Sink::isPersistent() const

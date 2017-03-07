@@ -370,10 +370,13 @@ namespace octo
     template <class T>
     class Value<T>::Listener
     {
+        friend class Value<T>;
+        
     public:
         //! Virtual destructor, because this is a polymorphic base class
         virtual ~Listener() = default;
         
+    protected:
         //! Called when the value is set to a constant
         virtual void setToConstant(Value<T>& value, const T& constant) = 0;
         
