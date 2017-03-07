@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -26,45 +26,20 @@
  
  */
 
-#ifndef OCTOPUS_NEGATION_HPP
-#define OCTOPUS_NEGATION_HPP
+// Utility header for including all basics of Octopus
 
-#include "UnaryOperation.hpp"
+#ifndef OCTOPUS_OCTOPUS_HPP
+#define OCTOPUS_OCTOPUS_HPP
 
-namespace octo
-{
-    //! Negate a signal
-    template <class T>
-    class Negation : public UnaryOperation<T>
-    {
-    public:
-        // Use the constructor from UnaryOperation
-        using UnaryOperation<T>::UnaryOperation;
-        
-        // Generate the moveToHeap() function
-        GENERATE_MOVE(Negation)
-        
-    private:
-        //! Generate a negative sample
-        void convertSample(const T& in, T& out) final override
-        {
-            out = -in;
-        }
-    };
-    
-    //! Operator overload for negating signals
-    template <class T>
-    Negation<T> operator-(Signal<T>& signal)
-    {
-        return {signal.getClock(), signal};
-    }
-    
-    //! Operator overload for negating signals
-    template <class T>
-    Negation<T> operator-(Signal<T>&& signal)
-    {
-        return {signal.getClock(), std::move(signal)};
-    }
-}
+#include "arithmetic.hpp"
+#include "binary_operation.hpp"
+#include "clock.hpp"
+#include "fold.hpp"
+#include "join.hpp"
+#include "sieve.hpp"
+#include "signal.hpp"
+#include "split.hpp"
+#include "unary_operation.hpp"
+#include "value.hpp"
 
 #endif

@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -26,52 +26,53 @@
  
  */
 
-#ifndef OCTOPUS_SIEVE_HPP
-#define OCTOPUS_SIEVE_HPP
+#ifndef OCTOPUS_BINARY_OPERATION_HPP
+#define OCTOPUS_BINARY_OPERATION_HPP
 
-#include <vector>
+#include <stdexcept>
 
-#include "UnaryOperation.hpp"
+#include "signal.hpp"
+#include "value.hpp"
 
 namespace octo
 {
-    //! Sifts out a single channel from a multi-channel signal
-    /*! Signals with a vector type are the common idiom within Octopus for representing
-        multi-channel signals. Sieves are used to filter out one their channels. If you'd
-        like to filter out all channels at once, use a Split. */
+    //! Applies a binary operation on two input signals
     template <class T>
-    class Sieve : public UnaryOperation<std::vector<T>, T>
+    class BinaryOperation : public Signal<T>
     {
     public:
-        //! Create the sieve by passing the channel
-        Sieve(Clock* clock, unsigned int channel = 0, const T& initialCache = T{}) :
-            UnaryOperation<std::vector<T>, T>(clock, initialCache),
-            channel(channel)
+        //! Construct an empty binary operation
+        BinaryOperation(Clock* clock, const T& initialCache = T{}) :
+            Signal<T>(clock, initialCache)
         {
             
         }
         
-        //! Create the sieve by passing the channel and input
-        Sieve(Clock* clock, Value<std::vector<T>> input, unsigned int channel = 0) :
-            UnaryOperation<std::vector<T>, T>(clock, std::move(input)),
-            channel(channel)
+        //! Construct the binary operation with two terms and its own clock
+        BinaryOperation(Clock* clock, Value<T> left, Value<T> right) :
+            Signal<T>(clock),
+            left(std::move(left)),
+            right(std::move(right))
         {
             
         }
-        
-        GENERATE_MOVE(Sieve)
         
     public:
-        //! The channel being sifted out
-        unsigned int channel = 0;
+        //! The left-hand side of the operation
+        Value<T> left;
+        
+        //! The left-hand side of the operation
+        Value<T> right;
         
     private:
-        //! Generated the sifted ouf signal
+        //! Generate a new sample
         void generateSample(T& out) final override
         {
-            const auto& x = this->input();
-            out = channel < x.size() ? x[channel] : T{};
+            combineSamples(left(), right(), out);
         }
+        
+        //! Combine two samples into a new one
+        virtual void combineSamples(const T& left, const T& right, T& out) = 0;
     };
 }
 

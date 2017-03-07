@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -26,43 +26,47 @@
  
  */
 
-#ifndef OCTOPUS_SIGNAL_BASE_HPP
-#define OCTOPUS_SIGNAL_BASE_HPP
+#ifndef OCTOPUS_UNARY_OPERATION_HPP
+#define OCTOPUS_UNARY_OPERATION_HPP
 
-#include <set>
-#include <typeinfo>
-
-#include "Sink.hpp"
+#include "signal.hpp"
+#include "value.hpp"
 
 namespace octo
 {
-    //! Base class for all signals in Octopus, regardless of their output type
-    class SignalBase : public Sink
+    //! Applies a unary operation on a single input signal
+    template <class In, class Out = In>
+    class UnaryOperation : public Signal<Out>
     {
     public:
-        //! Construct the signal base
-        SignalBase(Clock* clock);
+        //! Construct an empty unary operation
+        UnaryOperation(Clock* clock, const Out& initialCache = Out{}) :
+            Signal<Out>(clock, initialCache)
+        {
+            
+        }
         
-        //! Virtual destructor, because this is a polymorphic base class
-        virtual ~SignalBase();
-        
-        //! Retrieve the type info of the output
-        virtual const std::type_info& getTypeInfo() const = 0;
-        
-        //! Pull and retrieve the type-agnostic address of a sample
-        /*! The address is invalidated next time someone pulls the signal */
-        virtual const void* pullGeneric() = 0;
-        
-        //! Have all signals that depend on this one disconnect
-        void disconnectDependees();
+        //! Construct the unary operation with its input
+        UnaryOperation(Clock* clock, Value<In> input) :
+            Signal<Out>(clock),
+            input(std::move(input))
+        {
+            
+        }
         
     public:
-        //! The signals that depend on this signal
-        std::set<SignalBase*> dependees;
+        //! The input to the operation
+        Value<In> input;
         
     private:
-        //! Called when a dependent asks not to depend on it anymore (e.g. it is being destroyed)
-        virtual void disconnectFromDependent(SignalBase& dependent) { }
+        //! Convert the sample
+        virtual void convertSample(const In& in, Out& out) = 0;
+        
+        //! Generate a new sample by transforming it from input to output
+        void generateSample(Out& out) final override
+        {
+            convertSample(input(), out);
+        }
     };
 }
 

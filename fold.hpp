@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@
 #include <stdexcept>
 #include <vector>
 
-#include "Signal.hpp"
-#include "Value.hpp"
+#include "signal.hpp"
+#include "value.hpp"
 
 namespace octo
 {
@@ -49,31 +49,19 @@ namespace octo
     {
     public:
         //! Construct an empty fold
-        Fold(Clock* clock, const Out& initialCache = Out{}) : Signal<Out>(clock, initialCache) { }
+        using Signal<Out>::Signal;
         
-        //! Construct an empty fold
+        //! Construct a fold with a given number of inputs
         Fold(Clock* clock, std::size_t size) :
             Signal<Out>(clock)
         {
             resize(size);
         }
         
-        //! Construct a fold with two terms and a clock
+        //! Construct a fold with two terms
         Fold(Clock* clock, Value<In> lhs, Value<In> rhs) :
             Signal<Out>(clock)
         {
-            this->emplace(std::move(lhs));
-            this->emplace(std::move(rhs));
-        }
-        
-        //! Construct a fold with two terms
-        /*! @throw std::runtime_error: If the terms do not share the same clock */
-        Fold(Value<In>&& lhs, Value<In>&& rhs) :
-            Signal<Out>(lhs.getClock())
-        {
-            if (&lhs.getClock() != &rhs.getClock())
-                throw std::runtime_error("clocks of lhs and rhs of fold don't match");
-            
             this->emplace(std::move(lhs));
             this->emplace(std::move(rhs));
         }

@@ -9,28 +9,28 @@ add_library(octopus SHARED "")
 
 # Core
 set(HEADERS
-	Arithmetic.hpp
-	BinaryOperation.hpp
-	Clock.hpp
-	Division.hpp
-	Fold.hpp
-	Join.hpp
-	Negation.hpp
-	Octopus.hpp
-	Product.hpp
-	Sieve.hpp
-	Signal.hpp
-	SignalBase.hpp
-    Sink.hpp
-	Split.hpp
-	Subtraction.hpp
-	Sum.hpp
-	UnaryOperation.hpp
-	Value.hpp)
+	arithmetic.hpp
+	binary_operation.hpp
+	clock.hpp
+	division.hpp
+	fold.hpp
+	join.hpp
+	negation.hpp
+	octopus.hpp
+	product.hpp
+	sieve.hpp
+	signal.hpp
+	signal_base.hpp
+    sink.hpp
+	split.hpp
+	subtraction.hpp
+	sum.hpp
+	unary_operation.hpp
+	value.hpp)
 
 set(SOURCES
-    SignalBase.cpp
-    Sink.cpp)
+    signal_base.cpp
+    sink.cpp)
 
 target_sources(octopus PRIVATE ${HEADERS} ${SOURCES})
 source_group(\\ FILES ${HEADERS} ${SOURCES})

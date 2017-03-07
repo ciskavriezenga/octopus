@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -26,48 +26,45 @@
  
  */
 
-#ifndef OCTOPUS_UNARY_OPERATION_HPP
-#define OCTOPUS_UNARY_OPERATION_HPP
+#ifndef OCTOPUS_NEGATION_HPP
+#define OCTOPUS_NEGATION_HPP
 
-#include "Signal.hpp"
-#include "Value.hpp"
+#include "unary_operation.hpp"
 
 namespace octo
 {
-    //! Applies a unary operation on a single input signal
-    template <class In, class Out = In>
-    class UnaryOperation : public Signal<Out>
+    //! Negate a signal
+    template <class T>
+    class Negation : public UnaryOperation<T>
     {
     public:
-        //! Construct an empty unary operation
-        UnaryOperation(Clock* clock, const Out& initialCache = Out{}) :
-            Signal<Out>(clock, initialCache)
-        {
-            
-        }
+        // Use the constructor from UnaryOperation
+        using UnaryOperation<T>::UnaryOperation;
         
-        //! Construct the unary operation with its input
-        UnaryOperation(Clock* clock, Value<In> input) :
-            Signal<Out>(clock),
-            input(std::move(input))
-        {
-            
-        }
-        
-    public:
-        //! The input to the operation
-        Value<In> input;
+        // Generate the moveToHeap() function
+        GENERATE_MOVE(Negation)
         
     private:
-        //! Convert the sample
-        virtual void convertSample(const In& in, Out& out) = 0;
-        
-        //! Generate a new sample by transforming it from input to output
-        void generateSample(Out& out) final override
+        //! Generate a negative sample
+        void convertSample(const T& in, T& out) final override
         {
-            convertSample(input(), out);
+            out = -in;
         }
     };
+    
+    //! Operator overload for negating signals
+    template <class T>
+    Negation<T> operator-(Signal<T>& signal)
+    {
+        return {signal.getClock(), signal};
+    }
+    
+    //! Operator overload for negating signals
+    template <class T>
+    Negation<T> operator-(Signal<T>&& signal)
+    {
+        return {signal.getClock(), std::move(signal)};
+    }
 }
 
 #endif
