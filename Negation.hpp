@@ -46,11 +46,25 @@ namespace octo
         
     private:
         //! Generate a negative sample
-        void generateSample(T& out) final override
+        void convertSample(const T& in, T& out) final override
         {
-            out = -this->input();
+            out = -in;
         }
     };
+    
+    //! Operator overload for negating signals
+    template <class T>
+    Negation<T> operator-(Signal<T>& signal)
+    {
+        return {signal.getClock(), signal};
+    }
+    
+    //! Operator overload for negating signals
+    template <class T>
+    Negation<T> operator-(Signal<T>&& signal)
+    {
+        return {signal.getClock(), std::move(signal)};
+    }
 }
 
 #endif

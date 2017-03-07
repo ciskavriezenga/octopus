@@ -77,20 +77,39 @@ namespace octo
         
     public:
         //! Construct a value with constant value
-        Value(const T& constant = T{}) : Signal<T>(nullptr, constant), mode(ValueMode::CONSTANT), constant(constant) { }
+        Value(const T& constant = T{}) :
+            Signal<T>(nullptr, constant),
+            mode(ValueMode::CONSTANT),
+            constant(constant)
+        {
+            
+        }
         
         //! Construct a value referencing another signal
-        Value(Signal<T>& reference) : Value(reference.getClock(), reference) { }
+        Value(Signal<T>& reference) :
+            Signal<T>(reference.getClock(), reference()),
+            mode(ValueMode::REFERENCE),
+            reference(&reference)
+        {
+            reference.dependees.emplace(this);
+        }
         
         //! Reference another Value
         /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
         Value(Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Construct a value owning an internal signal
-        Value(Signal<T>&& internal) : Value(internal.getClock(), std::move(internal)) { }
+        Value(Signal<T>&& internal) : Value(std::move(internal).moveToHeap()) { }
         
         //! Construct a value owning an internal signal
-        Value(std::unique_ptr<Signal<T>> internal) : Value(internal->getClock(), std::move(internal)) { }
+        Value(std::unique_ptr<Signal<T>> internal) :
+            Signal<T>(internal->getClock(), internal->pull()),
+            mode(ValueMode::INTERNAL),
+            internal(std::move(internal))
+        {
+            if (!this->internal)
+                throw std::invalid_argument("value cannot contain a nullptr internal signal");
+        }
         
         //! Copying a Value is forbidden
         Value(const Value&) = delete;

@@ -45,10 +45,12 @@ namespace octo
         
         this->clock = clock;
         if (clock)
+        {
             timestamp = clock->now();
         
-        if (persistent && clock)
-            this->clock->addPersistentSink(*this);
+            if (persistent)
+                this->clock->addPersistentSink(*this);
+        }
         
         clockChanged(clock);
     }

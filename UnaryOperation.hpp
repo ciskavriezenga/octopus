@@ -54,16 +54,19 @@ namespace octo
             
         }
         
-        //! Construct the unary operation with its input
-        UnaryOperation(Value<In> input) :
-            UnaryOperation(input.getClock(), std::move(input))
-        {
-            
-        }
-        
     public:
         //! The input to the operation
         Value<In> input;
+        
+    private:
+        //! Convert the sample
+        virtual void convertSample(const In& in, Out& out) = 0;
+        
+        //! Generate a new sample by transforming it from input to output
+        void generateSample(Out& out) final override
+        {
+            convertSample(input(), out);
+        }
     };
 }
 
