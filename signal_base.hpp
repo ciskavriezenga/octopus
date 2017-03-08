@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -29,16 +29,20 @@
 #ifndef OCTOPUS_SIGNAL_BASE_HPP
 #define OCTOPUS_SIGNAL_BASE_HPP
 
-#include <cstdint>
 #include <set>
 #include <typeinfo>
+
+#include "sink.hpp"
 
 namespace octo
 {
     //! Base class for all signals in Octopus, regardless of their output type
-    class SignalBase
+    class SignalBase : public Sink
     {
     public:
+        //! Construct the signal base
+        SignalBase(Clock* clock);
+        
         //! Virtual destructor, because this is a polymorphic base class
         virtual ~SignalBase();
         
@@ -47,7 +51,7 @@ namespace octo
         
         //! Pull and retrieve the type-agnostic address of a sample
         /*! The address is invalidated next time someone pulls the signal */
-        virtual const void* pull() = 0;
+        virtual const void* pullGeneric() = 0;
         
         //! Have all signals that depend on this one disconnect
         void disconnectDependees();

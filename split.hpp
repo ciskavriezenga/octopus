@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@
 #include <memory>
 #include <vector>
 
-#include "Sieve.hpp"
-#include "Value.hpp"
+#include "sieve.hpp"
+#include "value.hpp"
 
 namespace octo
 {
@@ -51,24 +51,17 @@ namespace octo
     public:
         //! Construct the split
         /*! size The amount of sieves in the split */
-        Split(Clock& clock, std::size_t size = 0) :
-            input(clock)
+        Split(Clock* clock, std::size_t size = 0) :
+            clock(clock)
         {
             resize(size);
         }
         
         //! Construct the split by providing size and input
-        Split(Clock& clock, Value<std::vector<T>> input, std::size_t size) :
-            input(clock, std::move(input))
+        Split(Clock* clock, Value<std::vector<T>> input, std::size_t size) :
+            input(std::move(input))
         {
             resize(size);
-        }
-        
-        //! Construct the split by providing size and input
-        Split(Value<std::vector<T>> input, std::size_t size) :
-            Split(input.getClock(), std::move(input), size)
-        {
-            
         }
         
         //! Change the number of sieves
@@ -81,7 +74,11 @@ namespace octo
             
             // Add sieves if we're upsizing
             for (auto i = oldSize; i < size; ++i)
-                sieves[i] = std::make_unique<Sieve<T>>(input, i);
+            {
+                auto sieve = std::make_unique<Sieve<T>>(clock, i);
+                sieve->input = input;
+                sieves[i] = std::move(sieve);
+            }
         }
         
         //! Retrieve the size of the split
@@ -91,8 +88,12 @@ namespace octo
         Sieve<T>& operator[](std::size_t index) { return *sieves.at(index); }
         
         //! Change the clock of all sieves
-        void setClock(Clock& clock)
+        void setClock(Clock* clock)
         {
+            if (clock == this->clock)
+                return;
+            
+            this->clock = clock;
             for (auto& sieve : sieves)
                 sieve->setClock(clock);
         }
@@ -102,6 +103,9 @@ namespace octo
         Value<std::vector<T>> input;
         
     private:
+        //! The clock to use
+        Clock* clock = nullptr;
+        
         //! The sieves that make up this split
         std::vector<std::unique_ptr<Sieve<T>>> sieves;
     };

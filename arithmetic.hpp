@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -26,26 +26,15 @@
  
  */
 
-#include <stdexcept>
+#ifndef OCTOPUS_ARITHMETIC_HPP
+#define OCTOPUS_ARITHMETIC_HPP
 
-#include "SignalBase.hpp"
+// Includes all signals that have to do with arithmetic
 
-using namespace std;
+#include "division.hpp"
+#include "negation.hpp"
+#include "product.hpp"
+#include "subtraction.hpp"
+#include "sum.hpp"
 
-namespace octo
-{
-    SignalBase::~SignalBase()
-    {
-        disconnectDependees();
-    }
-    
-    void SignalBase::disconnectDependees()
-    {
-        auto cachedDependees = dependees;
-        for (auto& dependee : cachedDependees)
-            dependee->disconnectFromDependent(*this);
-        
-        if (!dependees.empty())
-            throw runtime_error("not all dependees disconnected");
-    }
-}
+#endif

@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -26,15 +26,20 @@
  
  */
 
-#ifndef OCTOPUS_ARITHMETIC_HPP
-#define OCTOPUS_ARITHMETIC_HPP
+// Utility header for including all basics of Octopus
 
-// Includes all signals that have to do with arithmetic
+#ifndef OCTOPUS_OCTOPUS_HPP
+#define OCTOPUS_OCTOPUS_HPP
 
-#include "Division.hpp"
-#include "Negation.hpp"
-#include "Product.hpp"
-#include "Subtraction.hpp"
-#include "Sum.hpp"
+#include "arithmetic.hpp"
+#include "binary_operation.hpp"
+#include "clock.hpp"
+#include "fold.hpp"
+#include "join.hpp"
+#include "sieve.hpp"
+#include "signal.hpp"
+#include "split.hpp"
+#include "unary_operation.hpp"
+#include "value.hpp"
 
 #endif

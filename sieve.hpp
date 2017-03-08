@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 
 #include <vector>
 
-#include "UnaryOperation.hpp"
+#include "unary_operation.hpp"
 
 namespace octo
 {
@@ -44,24 +44,17 @@ namespace octo
     {
     public:
         //! Create the sieve by passing the channel
-        Sieve(Clock& clock, unsigned int channel = 0) :
-            UnaryOperation<std::vector<T>, T>(clock),
+        Sieve(Clock* clock, unsigned int channel = 0, const T& initialCache = T{}) :
+            UnaryOperation<std::vector<T>, T>(clock, initialCache),
             channel(channel)
         {
             
         }
         
         //! Create the sieve by passing the channel and input
-        Sieve(Clock& clock, Value<std::vector<T>> input, unsigned int channel = 0) :
+        Sieve(Clock* clock, Value<std::vector<T>> input, unsigned int channel = 0) :
             UnaryOperation<std::vector<T>, T>(clock, std::move(input)),
             channel(channel)
-        {
-            
-        }
-        
-        //! Create the sive by passin the channel and input
-        Sieve(Value<std::vector<T>> input, unsigned int channel = 0) :
-            Sieve(input.getClock(), std::move(input), channel)
         {
             
         }
@@ -74,10 +67,9 @@ namespace octo
         
     private:
         //! Generated the sifted ouf signal
-        void generateSample(T& out) final override
+        void convertSample(const std::vector<T>& in, T& out) final override
         {
-            const auto& x = this->input();
-            out = channel < x.size() ? x[channel] : T{};
+            out = channel < in.size() ? in[channel] : T{};
         }
     };
 }

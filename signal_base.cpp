@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -26,20 +26,32 @@
  
  */
 
-// Utility header for including all basics of Octopus
+#include <stdexcept>
 
-#ifndef OCTOPUS_OCTOPUS_HPP
-#define OCTOPUS_OCTOPUS_HPP
+#include "signal_base.hpp"
 
-#include "Arithmetic.hpp"
-#include "BinaryOperation.hpp"
-#include "Clock.hpp"
-#include "Fold.hpp"
-#include "Join.hpp"
-#include "Sieve.hpp"
-#include "Signal.hpp"
-#include "Split.hpp"
-#include "UnaryOperation.hpp"
-#include "Value.hpp"
+using namespace std;
 
-#endif
+namespace octo
+{
+    SignalBase::SignalBase(Clock* clock) :
+        Sink(clock)
+    {
+        
+    }
+    
+    SignalBase::~SignalBase()
+    {
+        disconnectDependees();
+    }
+    
+    void SignalBase::disconnectDependees()
+    {
+        auto cachedDependees = dependees;
+        for (auto& dependee : cachedDependees)
+            dependee->disconnectFromDependent(*this);
+        
+        if (!dependees.empty())
+            throw runtime_error("not all dependees disconnected");
+    }
+}

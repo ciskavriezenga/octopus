@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -26,29 +26,46 @@
  
  */
 
-#ifndef OCTOPUS_NEGATION_HPP
-#define OCTOPUS_NEGATION_HPP
+#ifndef OCTOPUS_UNARY_OPERATION_HPP
+#define OCTOPUS_UNARY_OPERATION_HPP
 
-#include "UnaryOperation.hpp"
+#include "signal.hpp"
+#include "value.hpp"
 
 namespace octo
 {
-    //! Negate a signal
-    template <class T>
-    class Negation : public UnaryOperation<T>
+    //! Applies a unary operation on a single input signal
+    template <class In, class Out = In>
+    class UnaryOperation : public Signal<Out>
     {
     public:
-        // Use the constructor from UnaryOperation
-        using UnaryOperation<T>::UnaryOperation;
+        //! Construct an empty unary operation
+        UnaryOperation(Clock* clock, const Out& initialCache = Out{}) :
+            Signal<Out>(clock, initialCache)
+        {
+            
+        }
         
-        // Generate the moveToHeap() function
-        GENERATE_MOVE(Negation)
+        //! Construct the unary operation with its input
+        UnaryOperation(Clock* clock, Value<In> input) :
+            Signal<Out>(clock),
+            input(std::move(input))
+        {
+            
+        }
+        
+    public:
+        //! The input to the operation
+        Value<In> input;
         
     private:
-        //! Generate a negative sample
-        void generateSample(T& out) final override
+        //! Convert the sample
+        virtual void convertSample(const In& in, Out& out) = 0;
+        
+        //! Generate a new sample by transforming it from input to output
+        void generateSample(Out& out) final override
         {
-            out = -this->input();
+            convertSample(input(), out);
         }
     };
 }

@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 
 #include <type_traits>
 
-#include "BinaryOperation.hpp"
+#include "binary_operation.hpp"
 
 namespace octo
 {
@@ -55,35 +55,71 @@ namespace octo
     
     //! Combine a scalar and a signal into a subtraction
     template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T1, T2>::value, Subtraction<T2>> operator-(const T1& lhs, Signal<T2>& rhs) { return {Value<T1>(rhs.getClock(), lhs), rhs}; }
+    std::enable_if_t<std::is_convertible<T1, T2>::value, Subtraction<T2>> operator-(const T1& lhs, Signal<T2>& rhs)
+    {
+        return {rhs.getClock(), lhs, rhs};
+    }
     
     //! Combine a scalar and a signal into a subtraction
     template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T1, T2>::value, Subtraction<T2>> operator-(const T1& lhs, Signal<T2>&& rhs) { return {Value<T1>(rhs.getClock(), lhs), std::move(rhs).moveToHeap()}; }
+    std::enable_if_t<std::is_convertible<T1, T2>::value, Subtraction<T2>> operator-(const T1& lhs, Signal<T2>&& rhs)
+    {
+        return {rhs.getClock(), lhs, std::move(rhs)};
+    }
     
     //! Combine a scalar and a signal into a subtraction
     template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T2, T1>::value, Subtraction<T1>> operator-(Signal<T1>& lhs, const T2& rhs) { return {lhs, Value<T2>(lhs.getClock(), rhs)}; }
+    std::enable_if_t<std::is_convertible<T2, T1>::value, Subtraction<T1>> operator-(Signal<T1>& lhs, const T2& rhs)
+    {
+        return {lhs.getClock(), lhs, rhs};
+    }
     
     //! Combine two signals into a subtraction
     template <class T1, class T2>
-    Subtraction<std::common_type_t<T1, T2>> operator-(Signal<T1>& lhs, Signal<T2>& rhs) { return {lhs, rhs}; }
+    Subtraction<std::common_type_t<T1, T2>> operator-(Signal<T1>& lhs, Signal<T2>& rhs)
+    {
+        if (lhs.getClock() != rhs.getClock())
+            throw std::invalid_argument("cannot subtract two signals that do not use the same clock");
+        
+        return {lhs.getClock(), lhs, rhs};
+    }
     
     //! Combine two signals into a subtraction
     template <class T1, class T2>
-    Subtraction<std::common_type_t<T1, T2>> operator-(Signal<T1>& lhs, Signal<T2>&& rhs) { return {lhs, std::move(rhs).moveToHeap()}; }
+    Subtraction<std::common_type_t<T1, T2>> operator-(Signal<T1>& lhs, Signal<T2>&& rhs)
+    {
+        if (lhs.getClock() != rhs.getClock())
+            throw std::invalid_argument("cannot subtract two signals that do not use the same clock");
+        
+        return {lhs.getClock(), lhs, std::move(rhs)};
+    }
     
     //! Combine a scalar and a signal into a subtraction
     template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T2, T1>::value, Subtraction<T1>> operator-(Signal<T1>&& lhs, const T2& rhs) { return {std::move(lhs).moveToHeap(), Value<T2>(lhs.getClock(), rhs)}; }
+    std::enable_if_t<std::is_convertible<T2, T1>::value, Subtraction<T1>> operator-(Signal<T1>&& lhs, const T2& rhs)
+    {
+        return {lhs.getClock(), std::move(lhs), rhs};
+    }
     
     //! Combine two signals into a subtraction
     template <class T1, class T2>
-    Subtraction<std::common_type_t<T1, T2>> operator-(Signal<T1>&& lhs, Signal<T2>& rhs) { return {std::move(lhs).moveToHeap(), rhs}; }
+    Subtraction<std::common_type_t<T1, T2>> operator-(Signal<T1>&& lhs, Signal<T2>& rhs)
+    {
+        if (lhs.getClock() != rhs.getClock())
+            throw std::invalid_argument("cannot subtract two signals that do not use the same clock");
+        
+        return {lhs.getClock(), std::move(lhs), rhs};
+    }
     
     //! Combine two signals into a subtraction
     template <class T1, class T2>
-    Subtraction<std::common_type_t<T1, T2>> operator-(Signal<T1>&& lhs, Signal<T2>&& rhs) { return {std::move(lhs).moveToHeap(), std::move(rhs).moveToHeap()}; }
+    Subtraction<std::common_type_t<T1, T2>> operator-(Signal<T1>&& lhs, Signal<T2>&& rhs)
+    {
+        if (lhs.getClock() != rhs.getClock())
+            throw std::invalid_argument("cannot subtract two signals that do not use the same clock");
+        
+        return {lhs.getClock(), std::move(lhs), std::move(rhs)};
+    }
 }
 
 #endif

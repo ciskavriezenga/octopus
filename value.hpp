@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 #include <set>
 #include <stdexcept>
 
-#include "Signal.hpp"
+#include "signal.hpp"
 
 namespace octo
 {
@@ -77,36 +77,46 @@ namespace octo
         
     public:
         //! Construct a value with constant value
-        Value(Clock& clock, const T& constant = {}) : Signal<T>(clock), mode(ValueMode::CONSTANT), constant(constant) { }
+        Value(const T& constant = T{}) :
+            Signal<T>(nullptr, constant),
+            mode(ValueMode::CONSTANT),
+            constant(constant)
+        {
+            
+        }
         
         //! Construct a value referencing another signal
-        Value(Clock& clock, Signal<T>& reference) : Signal<T>(clock), mode(ValueMode::REFERENCE), reference(&reference) { }
-        
-        //! Construct a value referencing another signal
-        Value(Signal<T>& reference) : Value(reference.getClock(), reference) { }
+        Value(Signal<T>& reference) :
+            Signal<T>(reference.getClock(), reference()),
+            mode(ValueMode::REFERENCE),
+            reference(&reference)
+        {
+            reference.dependees.emplace(this);
+        }
         
         //! Reference another Value
         /*! This overload is necessary, because otherwise the deleted copy constructor is selected */
         Value(Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Construct a value owning an internal signal
-        Value(Clock& clock, Signal<T>&& internal) : Signal<T>(clock), mode(ValueMode::INTERNAL), internal(std::move(internal).moveToHeap()) { }
+        Value(Signal<T>&& internal) : Value(std::move(internal).moveToHeap()) { }
         
         //! Construct a value owning an internal signal
-        Value(Signal<T>&& internal) : Value(internal.getClock(), std::move(internal)) { }
-        
-        //! Construct a value owning an internal signal
-        Value(Clock& clock, std::unique_ptr<Signal<T>> internal) : Signal<T>(clock), mode(ValueMode::INTERNAL), internal(std::move(internal)) { }
-        
-        //! Construct a value owning an internal signal
-        Value(std::unique_ptr<Signal<T>> internal) : Value(internal->getClock(), std::move(internal)) { }
+        Value(std::unique_ptr<Signal<T>> internal) :
+            Signal<T>(internal->getClock(), internal->pull()),
+            mode(ValueMode::INTERNAL),
+            internal(std::move(internal))
+        {
+            if (!this->internal)
+                throw std::invalid_argument("value cannot contain a nullptr internal signal");
+        }
         
         //! Copying a Value is forbidden
         Value(const Value&) = delete;
         
         //! Moving from a value
         Value(Value&& rhs) :
-            Signal<T>(rhs.getClock())
+            Signal<T>(nullptr, rhs())
         {
             if (&rhs == this)
                 return;
@@ -118,9 +128,11 @@ namespace octo
                     break;
                 case ValueMode::REFERENCE:
                     reference = rhs.reference;
+                    setClock(reference->getClock());
                     break;
                 case ValueMode::INTERNAL:
                     new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
+                    setClock(internal->getClock());
                     break;
             }
                         
@@ -139,6 +151,7 @@ namespace octo
                 
                 mode = ValueMode::CONSTANT;
                 new (&this->constant) T(constant);
+                setClock(nullptr);
             }
             
             notifyConstantSet();
@@ -160,6 +173,7 @@ namespace octo
                 new (&this->reference) Signal<T>*(&reference);
                 
                 reference.dependees.emplace(this);
+                setClock(reference.getClock());
             }
             
             notifySignalSet();
@@ -185,6 +199,7 @@ namespace octo
                 
                 mode = ValueMode::INTERNAL;
                 new (&this->internal) std::unique_ptr<Signal<T>>(std::move(internal));
+                setClock(internal->getClock());
             }
             
             notifySignalSet();
@@ -209,9 +224,9 @@ namespace octo
                 deconstruct();
                 switch ((mode = rhs.mode))
                 {
-                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); break;
-                    case ValueMode::REFERENCE: reference = rhs.reference; break;
-                    case ValueMode::INTERNAL: new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal)); break;
+                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); setClock(nullptr); break;
+                    case ValueMode::REFERENCE: reference = rhs.reference; setClock(rhs.reference); break;
+                    case ValueMode::INTERNAL: new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal)); setClock(internal->getClock()); break;
                 }
             }
             
@@ -276,6 +291,8 @@ namespace octo
         std::set<Listener*> listeners;
         
     private:
+        using Sink::setClock;
+                              
         //! Deconstructs what's in the union
         /*! Internal use only. A new construction should take place immediately afterwards */
         void deconstruct()
@@ -306,9 +323,6 @@ namespace octo
                 case ValueMode::INTERNAL: out = (*internal)(); break;
             }
         }
-        
-        // Inherited from Signal
-        void clockChanged(Clock& clock) final override { }
         
         //! Reset the value, because the referenced signal will be destructed
         void disconnectFromDependent(SignalBase& dependent) final override
@@ -356,10 +370,13 @@ namespace octo
     template <class T>
     class Value<T>::Listener
     {
+        friend class Value<T>;
+        
     public:
         //! Virtual destructor, because this is a polymorphic base class
         virtual ~Listener() = default;
         
+    protected:
         //! Called when the value is set to a constant
         virtual void setToConstant(Value<T>& value, const T& constant) = 0;
         

@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@
 #include <stdexcept>
 #include <vector>
 
-#include "Signal.hpp"
-#include "Value.hpp"
+#include "signal.hpp"
+#include "value.hpp"
 
 namespace octo
 {
@@ -49,31 +49,19 @@ namespace octo
     {
     public:
         //! Construct an empty fold
-        Fold(Clock& clock) : Signal<Out>(clock) { }
+        using Signal<Out>::Signal;
         
-        //! Construct an empty fold
-        Fold(Clock& clock, std::size_t size) :
+        //! Construct a fold with a given number of inputs
+        Fold(Clock* clock, std::size_t size) :
             Signal<Out>(clock)
         {
             resize(size);
         }
         
-        //! Construct a fold with two terms and a clock
-        Fold(Clock& clock, Value<In> lhs, Value<In> rhs) :
+        //! Construct a fold with two terms
+        Fold(Clock* clock, Value<In> lhs, Value<In> rhs) :
             Signal<Out>(clock)
         {
-            this->emplace(std::move(lhs));
-            this->emplace(std::move(rhs));
-        }
-        
-        //! Construct a fold with two terms
-        /*! @throw std::runtime_error: If the terms do not share the same clock */
-        Fold(Value<In>&& lhs, Value<In>&& rhs) :
-            Signal<Out>(lhs.getClock())
-        {
-            if (&lhs.getClock() != &rhs.getClock())
-                throw std::runtime_error("clocks of lhs and rhs of fold don't match");
-            
             this->emplace(std::move(lhs));
             this->emplace(std::move(rhs));
         }
@@ -97,7 +85,7 @@ namespace octo
             inputs.resize(size);
             
             for (auto i = oldSize; i < size; ++i)
-                inputs[i] = std::make_unique<Value<In>>(this->getClock());
+                inputs[i] = std::make_unique<Value<In>>();
         }
         
         //! Retrieve one of the inputs
@@ -126,13 +114,6 @@ namespace octo
         /*! This funtion is called on each input, where the output is given as the first argument to the next call.
             It 'accumulates' all input samples in a single sample of type Out. */
         virtual Out fold(const Out& out, const In& in) const = 0;
-        
-        // Inherited from Signal
-        void clockChanged(Clock& clock) final override
-        {
-            for (auto& input : inputs)
-                input->setClock(clock);
-        }
         
     private:
         //! The inputs to the fold

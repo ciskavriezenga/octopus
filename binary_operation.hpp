@@ -4,7 +4,7 @@
  signal processing as a language inside your software. It transcends a single
  domain (audio, video, math, etc.), combining multiple clocks in one graph.
  
- Copyright (C) 2016 Dsperados <info@dsperados.com>
+ Copyright (C) 2017 Dsperados <info@dsperados.com>
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@
 
 #include <stdexcept>
 
-#include "Signal.hpp"
-#include "Value.hpp"
+#include "signal.hpp"
+#include "value.hpp"
 
 namespace octo
 {
@@ -42,29 +42,19 @@ namespace octo
     {
     public:
         //! Construct an empty binary operation
-        BinaryOperation(Clock& clock) :
-            Signal<T>(clock),
-            left(clock),
-            right(clock)
+        BinaryOperation(Clock* clock, const T& initialCache = T{}) :
+            Signal<T>(clock, initialCache)
         {
             
         }
         
         //! Construct the binary operation with two terms and its own clock
-        BinaryOperation(Clock& clock, Value<T> left, Value<T> right) :
+        BinaryOperation(Clock* clock, Value<T> left, Value<T> right) :
             Signal<T>(clock),
             left(std::move(left)),
             right(std::move(right))
         {
             
-        }
-        
-        //! Construct a binary operation with two terms
-        BinaryOperation(Value<T> left, Value<T> right) :
-            BinaryOperation(left.getClock(), std::move(left), std::move(right))
-        {
-            if (&left.getClock() != &right.getClock())
-                throw std::runtime_error("two clocks of binary operation don't match");
         }
         
     public:
@@ -83,13 +73,6 @@ namespace octo
         
         //! Combine two samples into a new one
         virtual void combineSamples(const T& left, const T& right, T& out) = 0;
-        
-        // Inherited from Signal
-        void clockChanged(Clock& clock) final override
-        {
-            left.setClock(clock);
-            right.setClock(clock);
-        }
     };
 }
 
