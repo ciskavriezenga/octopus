@@ -67,10 +67,9 @@ namespace octo
         
     private:
         //! Generated the sifted ouf signal
-        void convertSample(const T& in, T& out) final override
+        void convertSample(const std::vector<T>& in, T& out) final override
         {
-            const auto& x = in;
-            out = channel < x.size() ? x[channel] : T{};
+            out = channel < in.size() ? in[channel] : T{};
         }
     };
 }
