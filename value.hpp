@@ -35,6 +35,7 @@
 #include <set>
 #include <stdexcept>
 
+#include "polymorphic_value.hpp"
 #include "signal.hpp"
 
 namespace octo
@@ -78,7 +79,7 @@ namespace octo
     public:
         //! Construct a value with constant value
         Value(const T& constant = T{}) :
-            Signal<T>(nullptr, constant),
+            Signal<T>(nullptr),
             mode(ValueMode::CONSTANT),
             constant(constant)
         {
@@ -87,7 +88,7 @@ namespace octo
         
         //! Construct a value referencing another signal
         Value(Signal<T>& reference) :
-            Signal<T>(reference.getClock(), reference()),
+            Signal<T>(reference.getClock()),
             mode(ValueMode::REFERENCE),
             reference(&reference)
         {
@@ -99,28 +100,19 @@ namespace octo
         Value(Value& reference) : Value(dynamic_cast<Signal<T>&>(reference)) { }
         
         //! Construct a value owning an internal signal
-        Value(Signal<T>&& internal) : Value(std::move(internal).moveToHeap()) { }
-        
-        //! Construct a value owning an internal signal
-        Value(std::unique_ptr<Signal<T>> internal) :
-            Signal<T>(internal->getClock(), internal->pull()),
+        template <class U>
+        Value(U&& internal, typename std::enable_if_t<std::is_base_of<Signal<T>, U>::value>* = 0) :
+            Signal<T>(internal.getClock()),
             mode(ValueMode::INTERNAL),
             internal(std::move(internal))
         {
-            if (!this->internal)
-                throw std::invalid_argument("value cannot contain a nullptr internal signal");
+            
         }
         
-        //! Copying a Value is forbidden
-        Value(const Value&) = delete;
-        
-        //! Moving from a value
-        Value(Value&& rhs) :
-            Signal<T>(nullptr, rhs())
+        //! Copy another value
+        Value(const Value& rhs) :
+            Signal<T>(nullptr)
         {
-            if (&rhs == this)
-                return;
-            
             switch (mode = rhs.mode)
             {
                 case ValueMode::CONSTANT:
@@ -131,7 +123,27 @@ namespace octo
                     setClock(reference->getClock());
                     break;
                 case ValueMode::INTERNAL:
-                    new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal));
+                    new (&internal) polymorphic_value<Signal<T>>(rhs.internal);
+                    setClock(internal->getClock());
+                    break;
+            }
+        }
+        
+        //! Moving another value into this one
+        Value(Value&& rhs) :
+            Signal<T>(nullptr, rhs())
+        {
+            switch (mode = rhs.mode)
+            {
+                case ValueMode::CONSTANT:
+                    new (&constant) T(rhs.constant);
+                    break;
+                case ValueMode::REFERENCE:
+                    reference = rhs.reference;
+                    setClock(reference->getClock());
+                    break;
+                case ValueMode::INTERNAL:
+                    new (&internal) polymorphic_value<Signal<T>>(std::move(rhs.internal));
                     setClock(internal->getClock());
                     break;
             }
@@ -182,24 +194,16 @@ namespace octo
         }
         
         //! Have the value contain another signal
-        Value& operator=(Signal<T>&& internal)
-        {
-            return *this = std::move(internal).moveToHeap();
-        }
-        
-        //! Have the value contain another signal
-        Value& operator=(std::unique_ptr<Signal<T>> internal)
-        {
-            if (!internal)
-                throw std::invalid_argument("nullptr given to Value");
-            
+        template <class U>
+        std::enable_if_t<std::is_base_of<Signal<T>, U>::value, Value>& operator=(U&& internal)
+        {            
             {
                 std::unique_lock<std::mutex> lock(mutex);
                 deconstruct();
                 
                 mode = ValueMode::INTERNAL;
-                new (&this->internal) std::unique_ptr<Signal<T>>(std::move(internal));
-                setClock(internal->getClock());
+                new (&this->internal) polymorphic_value<U>(std::move(internal));
+                setClock(this->internal->getClock());
             }
             
             notifySignalSet();
@@ -207,8 +211,36 @@ namespace octo
             return *this;
         }
         
-        //! Copying is forbidden
-        Value& operator=(const Value&) = delete;
+        //! Copy the value
+        Value& operator=(const Value& rhs)
+        {
+            if (&rhs == this)
+                return *this;
+            
+            if (mode != rhs.mode ||
+                (isConstant() && constant != rhs.constant) ||
+                (isReference() && reference != rhs.reference))
+            {
+                std::unique_lock<std::mutex> lock(mutex);
+                deconstruct();
+                switch (mode = rhs.mode)
+                {
+                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); setClock(nullptr); break;
+                    case ValueMode::REFERENCE: reference = rhs.reference; setClock(rhs.reference->getClock()); break;
+                    case ValueMode::INTERNAL: new (&internal) polymorphic_value<Signal<T>>(rhs.internal); setClock(internal->getClock()); break;
+                }
+            }
+            
+            // We're notifying in a different switch, so that we can unlock the mutex earlier
+            switch (mode)
+            {
+                case ValueMode::CONSTANT: notifyConstantSet(); break;
+                case ValueMode::REFERENCE: notifyConstantSet(); break;
+                case ValueMode::INTERNAL: notifyConstantSet(); break;
+            }
+            
+            return *this;
+        }
         
         //! Moving from another Value
         Value& operator=(Value&& rhs)
@@ -225,8 +257,8 @@ namespace octo
                 switch ((mode = rhs.mode))
                 {
                     case ValueMode::CONSTANT: new (&constant) T(rhs.constant); setClock(nullptr); break;
-                    case ValueMode::REFERENCE: reference = rhs.reference; setClock(rhs.reference); break;
-                    case ValueMode::INTERNAL: new (&internal) std::unique_ptr<Signal<T>>(std::move(rhs.internal)); setClock(internal->getClock()); break;
+                    case ValueMode::REFERENCE: reference = rhs.reference; setClock(rhs.reference->getClock()); break;
+                    case ValueMode::INTERNAL: new (&internal) polymorphic_value<Signal<T>>(std::move(rhs.internal)); setClock(internal->getClock()); break;
                 }
             }
             
@@ -284,8 +316,6 @@ namespace octo
             }
         }
         
-        GENERATE_MOVE(Value)
-        
     public:
         //! A collection of listeners for Value events
         std::set<Listener*> listeners;
@@ -307,7 +337,7 @@ namespace octo
                     reference = nullptr;
                     break;
                 case ValueMode::INTERNAL:
-                    internal.~unique_ptr();
+                    internal.~polymorphic_value();
                     break;
             }
         }
@@ -358,8 +388,8 @@ namespace octo
             //! Holds non-owned signal pointer if mode == ValueMode::NON_OWNED
             Signal<T>* reference;
             
-            //! Holds owned signal unique_ptr if mode == ValueMode::OWNED
-            std::unique_ptr<Signal<T>> internal;
+            //! Holds owned signal polymorphic_value if mode == ValueMode::OWNED
+            polymorphic_value<Signal<T>> internal;
         };
         
         //! A mutex for updating the value reference

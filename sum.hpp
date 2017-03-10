@@ -50,8 +50,6 @@ namespace octo
             return *this;
         }
         
-        GENERATE_MOVE(Sum)
-        
     private:
         // Inherited from Fold
         T init() const final override { return 0; }

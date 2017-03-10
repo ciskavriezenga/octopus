@@ -96,11 +96,6 @@ namespace octo
         //! Return the current sample of the signal
         explicit operator T() { return (*this)(); }
         
-        //! Move this signal to the heap
-        /*! Signals need to implement this to support in-place creation of signals in expressions.
-            @note This function can only be used on r-value signal objects. */
-        virtual std::unique_ptr<Signal> moveToHeap() && = 0;
-        
         // Inherited from SignalBase
         const std::type_info& getTypeInfo() const final override { return typeid(T); }
         const void* pullGeneric() final override { return &(*this)(); }
@@ -116,13 +111,6 @@ namespace octo
         //! A cache for previously generated samples
         T cache = T{};
     };
-    
-    // Convenience macro for overriding Signal::move()
-    #define GENERATE_MOVE(CLASS) \
-    auto moveToHeap() && -> std::unique_ptr<octo::Signal<typename std::decay<decltype(std::declval<CLASS>().operator()())>::type>> override \
-    { \
-        return std::make_unique<CLASS>(std::move(*this)); \
-    }
 }
 
 #endif

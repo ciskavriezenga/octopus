@@ -41,9 +41,6 @@ namespace octo
         // Use the constructor from UnaryOperation
         using UnaryOperation<T>::UnaryOperation;
         
-        // Generate the moveToHeap() function
-        GENERATE_MOVE(Negation)
-        
     private:
         //! Generate a negative sample
         void convertSample(const T& in, T& out) final override

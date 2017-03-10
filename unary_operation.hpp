@@ -39,15 +39,8 @@ namespace octo
     class UnaryOperation : public Signal<Out>
     {
     public:
-        //! Construct an empty unary operation
-        UnaryOperation(Clock* clock, const Out& initialCache = Out{}) :
-            Signal<Out>(clock, initialCache)
-        {
-            
-        }
-        
-        //! Construct the unary operation with its input
-        UnaryOperation(Clock* clock, Value<In> input) :
+        //! Construct the unary operation
+        UnaryOperation(Clock* clock, Value<In> input = In{}) :
             Signal<Out>(clock),
             input(std::move(input))
         {

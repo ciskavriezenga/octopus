@@ -59,8 +59,6 @@ namespace octo
             
         }
         
-        GENERATE_MOVE(Sieve)
-        
     public:
         //! The channel being sifted out
         unsigned int channel = 0;

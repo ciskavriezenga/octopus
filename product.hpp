@@ -50,8 +50,6 @@ namespace octo
             return *this;
         }
         
-        GENERATE_MOVE(Product)
-        
     private:
         // Inherited from Fold
         T init() const final override { return 1; }
