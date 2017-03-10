@@ -16,7 +16,7 @@ Other features of Octopus include:
 ```
 #include <cmath>
 #include <iostream>
-#include <octopus/Octopus.hpp>
+#include <octopus/octopus.hpp>
 
 using namespace octo;
 
@@ -25,9 +25,9 @@ class Sine : public Signal<float>
 {
 public:
 	// Take a clock in the constructor and pass it to the base class
-	Sine(Clock& clock, float frequency = 0.0f) :
+	Sine(Clock* clock, float frequency = 0.0f) :
 	     Signal<float>(clock),
-	     frequency(clock, frequency)
+	     frequency(frequency)
 	{
 
 	}
@@ -46,15 +46,9 @@ private:
 		out = std::sin(phase * 6.28318530717959);
 
 		// Increment and wrap the phase
-		phase += this->getClock().delta() * frequency();
+		phase += this->getClock()->delta() * frequency();
 		while (phase >= 1.0)
 			phase -= 1.0;
-	}
-	
-	// This function is called when the clock on the signal changes
-	void clockChanged(octo::Clock& clock) final override
-	{
-		frequency.setClock(clock);
 	}
 
 	long double phase = 0;
@@ -66,11 +60,11 @@ int main(int argc, char* argv[])
 	InvariableClock audio(44100);
 
 	// Create a sine oscillator that outputs floats and uses the audio clock
-	Sine oscillator(audio);
+	Sine oscillator(&audio);
 
 	// Set the frequency of the oscillator to 440 + (100 * an lfo at 0.5 Hertz)
 	// In other words, set the oscillator to vibrate between 340 and 540 once per 2 seconds
-	oscillator.frequency = 440.0f + 100.0f * Sine(audio, 0.5f);
+	oscillator.frequency = 440.0f + 100.0f * Sine(&audio, 0.5f);
 
 	do
 	{
