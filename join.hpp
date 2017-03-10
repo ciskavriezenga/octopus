@@ -59,9 +59,6 @@ namespace octo
             return *this;
         }
         
-        // Generate the move function
-        GENERATE_MOVE(Join)
-        
     private:
         //! Return the monoid identity
         std::vector<T> init() const final override { return {}; }

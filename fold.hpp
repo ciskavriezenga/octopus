@@ -30,11 +30,11 @@
 #define OCTOPUS_FOLD_HPP
 
 #include <cstdint>
-#include <memory>
 #include <numeric>
 #include <stdexcept>
 #include <vector>
 
+#include "polymorphic_value.hpp"
 #include "signal.hpp"
 #include "value.hpp"
 
@@ -66,16 +66,13 @@ namespace octo
             this->emplace(std::move(rhs));
         }
         
-        Fold(const Fold&) = delete;
-        Fold(Fold&&) = default;
-        
         //! Virtual destructor, because this is a polymorphic base class
         virtual ~Fold() = default;
         
         //! Add a new input to the fold
         void emplace(Value<In> input)
         {
-            inputs.emplace_back(std::make_unique<Value<In>>(std::move(input)));
+            inputs.emplace_back(std::move(input));
         }
         
         //! Change the amount of inputs
@@ -85,7 +82,7 @@ namespace octo
             inputs.resize(size);
             
             for (auto i = oldSize; i < size; ++i)
-                inputs[i] = std::make_unique<Value<In>>();
+                inputs[i] = make_polymorphic_value<Value<In>>();
         }
         
         //! Retrieve one of the inputs
@@ -101,7 +98,7 @@ namespace octo
             if (inputs.empty())
                 out = {};
             else
-                out = std::accumulate(inputs.begin(), inputs.end(), init(), [&](auto& a, auto& b){ return fold(a, (*b)()); });
+                out = std::accumulate(inputs.begin(), inputs.end(), init(), [&](auto& a, auto& b){ return fold(a, b->pull()); });
         }
         
         //! Return the initial value of the fold
@@ -117,7 +114,7 @@ namespace octo
         
     private:
         //! The inputs to the fold
-        std::vector<std::unique_ptr<Value<In>>> inputs;
+        std::vector<polymorphic_value<Value<In>>> inputs;
     };
 }
 

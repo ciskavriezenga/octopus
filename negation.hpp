@@ -41,9 +41,6 @@ namespace octo
         // Use the constructor from UnaryOperation
         using UnaryOperation<T>::UnaryOperation;
         
-        // Generate the moveToHeap() function
-        GENERATE_MOVE(Negation)
-        
     private:
         //! Generate a negative sample
         void convertSample(const T& in, T& out) final override
@@ -53,15 +50,15 @@ namespace octo
     };
     
     //! Operator overload for negating signals
-    template <class T>
-    Negation<T> operator-(Signal<T>& signal)
+    template <typename T, typename = std::enable_if_t<std::is_base_of<Sink, typename std::decay_t<T>>::value>>
+    Negation<typename T::type> operator-(T& signal)
     {
         return {signal.getClock(), signal};
     }
     
     //! Operator overload for negating signals
-    template <class T>
-    Negation<T> operator-(Signal<T>&& signal)
+    template <typename T, typename = std::enable_if_t<std::is_base_of<Sink, typename std::decay_t<T>>::value>>
+    Negation<typename T::type> operator-(T&& signal)
     {
         return {signal.getClock(), std::move(signal)};
     }

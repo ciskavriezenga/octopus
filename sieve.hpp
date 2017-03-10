@@ -43,23 +43,13 @@ namespace octo
     class Sieve : public UnaryOperation<std::vector<T>, T>
     {
     public:
-        //! Create the sieve by passing the channel
-        Sieve(Clock* clock, unsigned int channel = 0, const T& initialCache = T{}) :
-            UnaryOperation<std::vector<T>, T>(clock, initialCache),
-            channel(channel)
-        {
-            
-        }
-        
-        //! Create the sieve by passing the channel and input
-        Sieve(Clock* clock, Value<std::vector<T>> input, unsigned int channel = 0) :
+        //! Create the sieve
+        Sieve(Clock* clock, unsigned int channel = 0, Value<std::vector<T>> input = {}) :
             UnaryOperation<std::vector<T>, T>(clock, std::move(input)),
             channel(channel)
         {
             
         }
-        
-        GENERATE_MOVE(Sieve)
         
     public:
         //! The channel being sifted out

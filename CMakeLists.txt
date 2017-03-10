@@ -17,6 +17,7 @@ set(HEADERS
 	join.hpp
 	negation.hpp
 	octopus.hpp
+    polymorphic_value.hpp
 	product.hpp
 	sieve.hpp
 	signal.hpp

@@ -43,8 +43,6 @@ namespace octo
         // Reuse the constructor of BinaryOperation
         using BinaryOperation<T>::BinaryOperation;
         
-        GENERATE_MOVE(Subtraction)
-        
     private:
         //! Generate a new sample
         void combineSamples(const T& lhs, const T& rhs, T& out) final override
