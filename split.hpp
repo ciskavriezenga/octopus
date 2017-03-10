@@ -29,9 +29,9 @@
 #ifndef OCTOPUS_SPLIT_HPP
 #define OCTOPUS_SPLIT_HPP
 
-#include <memory>
 #include <vector>
 
+#include "polymorphic_value.hpp"
 #include "sieve.hpp"
 #include "value.hpp"
 
@@ -75,9 +75,8 @@ namespace octo
             // Add sieves if we're upsizing
             for (auto i = oldSize; i < size; ++i)
             {
-                auto sieve = std::make_unique<Sieve<T>>(clock, i);
-                sieve->input = input;
-                sieves[i] = std::move(sieve);
+                sieves[i] = make_polymorphic_value<Sieve<T>>(clock, static_cast<unsigned int>(i));
+                sieves[i]->input = input;
             }
         }
         
@@ -107,7 +106,7 @@ namespace octo
         Clock* clock = nullptr;
         
         //! The sieves that make up this split
-        std::vector<std::unique_ptr<Sieve<T>>> sieves;
+        std::vector<polymorphic_value<Sieve<T>>> sieves;
     };
 }
 
