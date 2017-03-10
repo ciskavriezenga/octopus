@@ -50,8 +50,8 @@ namespace octo
     };
     
     //! Operator overload for negating signals
-    template <typename T>
-    Negation<T> operator-(Signal<T>& signal)
+    template <typename T, typename = std::enable_if_t<std::is_base_of<Sink, typename std::decay_t<T>>::value>>
+    Negation<typename T::type> operator-(T& signal)
     {
         return {signal.getClock(), signal};
     }
