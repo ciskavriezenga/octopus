@@ -56,88 +56,96 @@ namespace octo
         T fold(const T& in, const T& out) const final override { return in + out; }
     };
     
-    //! Combine a scalar and a signal into a sum
-    template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T1, T2>::value, Sum<T2>> operator+(const T1& lhs, Signal<T2>& rhs)
+    // scalar + &
+    template <typename Lhs, typename Rhs, typename = typename std::enable_if_t<
+        !std::is_base_of<Sink, typename std::decay_t<Lhs>>::value &&
+        std::is_base_of<Sink, typename std::decay_t<Rhs>>::value>>
+    Sum<std::common_type_t<Lhs, typename Rhs::type>>
+    operator+(const Lhs& lhs, Rhs& rhs)
     {
         return {rhs.getClock(), lhs, rhs};
     }
     
-    //! Combine a scalar and a signal into a sum
-    template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T1, T2>::value, Sum<T2>> operator+(const T1& lhs, Signal<T2>&& rhs)
+    // scalar + &&
+    template <typename Lhs, typename Rhs, typename = typename std::enable_if_t<
+        !std::is_base_of<Sink, typename std::decay_t<Lhs>>::value &&
+        std::is_base_of<Sink, typename std::decay_t<Rhs>>::value>>
+    Sum<std::common_type_t<Lhs, typename Rhs::type>>
+    operator+(const Lhs& lhs, Rhs&& rhs)
     {
         return {rhs.getClock(), lhs, std::move(rhs)};
     }
     
-    //! Combine a scalar and a signal into a sum
-    template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T2, T1>::value, Sum<T1>> operator+(Signal<T1>& lhs, const T2& rhs)
+    // & + scalar
+    template <typename Lhs, typename Rhs, typename = typename std::enable_if_t<
+        std::is_base_of<Sink, typename std::decay_t<Lhs>>::value &&
+        !std::is_base_of<Sink, typename std::decay_t<Rhs>>::value>>
+    Sum<std::common_type_t<typename Lhs::type, Rhs>>
+    operator+(Lhs& lhs, const Rhs& rhs)
     {
         return {lhs.getClock(), lhs, rhs};
     }
     
-    //! Combine two signals into a sum
-    template <class T1, class T2>
-    Sum<std::common_type_t<T1, T2>> operator+(Signal<T1>& lhs, Signal<T2>& rhs)
+    // & + &
+    template <typename Lhs, typename Rhs, typename = typename std::enable_if_t<
+        std::is_base_of<Sink, typename std::decay_t<Lhs>>::value &&
+        std::is_base_of<Sink, typename std::decay_t<Rhs>>::value>>
+    Sum<std::common_type_t<typename Lhs::type, typename Rhs::type>>
+    operator+(Lhs& lhs, Rhs& rhs)
     {
         if (lhs.getClock() != rhs.getClock())
-            throw std::invalid_argument("cannot sum two signals that do not use the same clock");
+            throw std::runtime_error("can't deduce clock in sum of two sinks");
         
         return {lhs.getClock(), lhs, rhs};
     }
     
-    //! Combine two signals into a sum
-    template <class T1, class T2>
-    Sum<std::common_type_t<T1, T2>> operator+(Signal<T1>& lhs, Signal<T2>&& rhs)
+    // & + &&
+    template <typename Lhs, typename Rhs, typename = typename std::enable_if_t<
+        std::is_base_of<Sink, typename std::decay_t<Lhs>>::value &&
+        std::is_base_of<Sink, typename std::decay_t<Rhs>>::value>>
+    Sum<std::common_type_t<typename Lhs::type, typename Rhs::type>>
+    operator+(Lhs& lhs, Rhs&& rhs)
     {
         if (lhs.getClock() != rhs.getClock())
-            throw std::invalid_argument("cannot sum two signals that do not use the same clock");
+            throw std::runtime_error("can't deduce clock in sum of two sinks");
         
         return {lhs.getClock(), lhs, std::move(rhs)};
     }
     
-    //! Combine a scalar and a signal into a sum
-    template <class T1, class T2>
-    std::enable_if_t<std::is_convertible<T2, T1>::value, Sum<T1>> operator+(Signal<T1>&& lhs, const T2& rhs)
+    // && + scalar
+    template <typename Lhs, typename Rhs, typename = typename std::enable_if_t<
+        std::is_base_of<Sink, typename std::decay_t<Lhs>>::value &&
+        !std::is_base_of<Sink, typename std::decay_t<Rhs>>::value>>
+    Sum<std::common_type_t<typename Lhs::type, Rhs>>
+    operator+(Lhs&& lhs, const Rhs& rhs)
     {
         return {lhs.getClock(), std::move(lhs), rhs};
     }
     
-    //! Combine two signals into a sum
-    template <class T1, class T2>
-    Sum<std::common_type_t<T1, T2>> operator+(Signal<T1>&& lhs, Signal<T2>& rhs)
+    // && + &
+    template <typename Lhs, typename Rhs, typename = typename std::enable_if_t<
+        std::is_base_of<Sink, typename std::decay_t<Lhs>>::value &&
+        std::is_base_of<Sink, typename std::decay_t<Rhs>>::value>>
+    Sum<std::common_type_t<typename Lhs::type, typename Rhs::type>>
+    operator+(Lhs&& lhs, Rhs& rhs)
     {
         if (lhs.getClock() != rhs.getClock())
-            throw std::invalid_argument("cannot sum two signals that do not use the same clock");
+            throw std::runtime_error("can't deduce clock in sum of two sinks");
         
         return {lhs.getClock(), std::move(lhs), rhs};
     }
     
-    //! Combine two signals into a sum
-    template <class T1, class T2>
-    Sum<std::common_type_t<T1, T2>> operator+(Signal<T1>&& lhs, Signal<T2>&& rhs)
+    // && + &&
+    template <typename Lhs, typename Rhs, typename = typename std::enable_if_t<
+        std::is_base_of<Sink, typename std::decay_t<Lhs>>::value &&
+        std::is_base_of<Sink, typename std::decay_t<Rhs>>::value>>
+    Sum<std::common_type_t<typename Lhs::type, typename Rhs::type>>
+    operator+(Lhs&& lhs, Rhs&& rhs)
     {
         if (lhs.getClock() != rhs.getClock())
-            throw std::invalid_argument("cannot sum two signals that do not use the same clock");
+            throw std::runtime_error("can't deduce clock in sum of two sinks");
         
         return {lhs.getClock(), std::move(lhs), std::move(rhs)};
-    }
-    
-    //! Add another term to a sum
-    template <class T1, class T2>
-    Sum<T1> operator+(Sum<T1>&& lhs, T2&& rhs)
-    {
-        lhs.emplace(std::forward<T2&&>(rhs));
-        return std::move(lhs);
-    }
-    
-    //! Add another term to a sum
-    template <class T1, class T2>
-    Sum<T2> operator+(T1&& lhs, Sum<T2>&& rhs)
-    {
-        rhs.emplace(std::forward<T1&&>(lhs));
-        return std::move(rhs);
     }
 }
 

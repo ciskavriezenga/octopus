@@ -66,9 +66,6 @@ namespace octo
             this->emplace(std::move(rhs));
         }
         
-        Fold(const Fold&) = delete;
-        Fold(Fold&&) = default;
-        
         //! Virtual destructor, because this is a polymorphic base class
         virtual ~Fold() = default;
         

@@ -100,6 +100,9 @@ namespace octo
         const std::type_info& getTypeInfo() const final override { return typeid(T); }
         const void* pullGeneric() final override { return &(*this)(); }
         
+        //! The type for template meta programming
+        using type = T;
+        
     private:
         //! Generate a new sample
         virtual void generateSample(T& out) = 0;
