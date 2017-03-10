@@ -30,7 +30,6 @@
 #define OCTOPUS_VALUE_HPP
 
 #include <cassert>
-#include <memory>
 #include <mutex>
 #include <set>
 #include <stdexcept>
