@@ -15,7 +15,7 @@ source_group(\\ FILES ${HEADERS} ${SOURCES})
 install(FILES ${HEADERS} DESTINATION include/octopus)
 
 # Create the target
-add_library(Octopus SHARED ${HEADERS} ${SOURCES})
+add_library(Octopus ${HEADERS} ${SOURCES})
 install(TARGETS Octopus DESTINATION lib)
 
 if (BUILD_SHARED_LIBS)
