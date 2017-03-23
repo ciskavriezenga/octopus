@@ -54,6 +54,7 @@ namespace octo
         // Inherited from Fold
         T init() const final override { return 1; }
         T fold(const T& in, const T& out) const final override { return in * out; }
+        T getDefaultInputValue() const final override { return 1; }
     };
     
     // scalar * &

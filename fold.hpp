@@ -82,7 +82,7 @@ namespace octo
             inputs.resize(size);
             
             for (auto i = oldSize; i < size; ++i)
-                inputs[i] = make_polymorphic_value<Value<In>>();
+                inputs[i] = make_polymorphic_value<Value<In>>(getDefaultInputValue());
         }
         
         //! Retrieve one of the inputs
@@ -111,6 +111,9 @@ namespace octo
         /*! This funtion is called on each input, where the output is given as the first argument to the next call.
             It 'accumulates' all input samples in a single sample of type Out. */
         virtual Out fold(const Out& out, const In& in) const = 0;
+        
+        //! Return the default value for new inputs
+        virtual In getDefaultInputValue() const { return {}; }
         
     private:
         //! The inputs to the fold
