@@ -31,6 +31,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <mutex>
 #include <set>
 
 #include "sink.hpp"
@@ -50,28 +51,22 @@ namespace octo
         //! Return the delta between ticks (in seconds)
         virtual float delta() const { return 1.0 / rate(); }
         
-        //! Tick the clock
-        uint64_t tick()
-        {
-            onTick();
-            
-            for (auto& sink : persistentSinks)
-                sink->update();
-            
-            return now();
-        }
+        //! Move the clock forward to its next frame
+        /*! Ticking a clock means that all sinks/signals that are set to
+            follow this clock will generate a new sample when pulled. */
+        uint64_t tick();
         
         //! Return the clocks current time index
         virtual uint64_t now() const = 0;
         
         //! Add a signal as persistent
-        void addPersistentSink(Sink& sink) { persistentSinks.emplace(&sink); }
+        void addPersistentSink(Sink& sink);
         
         //! Remove a signal as persistent
-        void removePersistentSink(Sink& sink) { persistentSinks.erase(&sink); }
+        void removePersistentSink(Sink& sink);
         
         //! Is a signal persistent for this clock?
-        bool isSinkPersistent(const Sink& sink) const { return persistentSinks.count(const_cast<Sink*>(&sink)); }
+        bool isSinkPersistent(const Sink& sink) const;
         
     private:
         //! Move the clock to its next time index
@@ -80,6 +75,9 @@ namespace octo
     private:
         //! The sinks that will be updated with each tick
         std::set<Sink*> persistentSinks;
+        
+        //! The mutex for locking around changes to the persistent sinks
+        std::mutex persistencyMutex;
     };
     
     //! A clock with an invariable, constant rate
@@ -97,11 +95,7 @@ namespace octo
     public:
         //! Construct the clock
         /*! @param rateInHertz The rate at which the clocks runs (changes only with setRate). */
-        InvariableClock(float rateInHertz) :
-            rate_(rateInHertz)
-        {
-            
-        }
+        InvariableClock(float rateInHertz);
         
         //! Set the sample rate of the clock (in Hertz)
         void setRate(float rateInHertz) { rate_ = rateInHertz; }
@@ -139,11 +133,7 @@ namespace octo
     public:
         //! Construct the clock
         /*! @param startingRateInHertz The rate at which the clocks starts running (will be influenced by subsequent ticks) */
-        VariableClock(float startingRateInHertz) :
-            rate_(startingRateInHertz)
-        {
-            lastNow = std::chrono::high_resolution_clock::now();
-        }
+        VariableClock(float startingRateInHertz);
         
         //! Return the rate at which the clock runs (in Hertz)
         float rate() const final override { return rate_; }
@@ -153,14 +143,7 @@ namespace octo
         
     private:
         //! Move the clock to its next time index
-        void onTick() final override
-        {
-            auto now = std::chrono::high_resolution_clock::now();
-            rate_ = 1.0 / std::chrono::duration_cast<std::chrono::duration<double>>(now - lastNow).count();
-            lastNow = now;
-            
-            ++timestamp;
-        }
+        void onTick() final override;
         
     private:
         //! The rate at which the clock currently runs

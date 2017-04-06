@@ -39,6 +39,12 @@ namespace octo
         if (clock)
             timestamp = clock->now();
     }
+
+    Sink::~Sink()
+    {
+        if (isPersistent())
+            setPersistency(false);
+    }
     
     void Sink::update()
     {

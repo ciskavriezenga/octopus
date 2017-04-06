@@ -47,7 +47,7 @@ namespace octo
         Sink(Clock* clock);
         
         //! Virtual destructor, because this is a polymorphic base class
-        virtual ~Sink() = default;
+        virtual ~Sink();
         
         //! Make sure the sink is up to date with the clock it was given
         void update();
