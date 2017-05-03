@@ -49,10 +49,10 @@ namespace octo
     {
     public:
         //! Construct a fold with a given number of inputs
-        Fold(Clock* clock, std::size_t size = 0) :
+        Fold(Clock* clock, std::size_t size, const In& defaultValue) :
             Signal<Out>(clock)
         {
-            resize(size);
+            
         }
         
         //! Construct a fold with two terms
