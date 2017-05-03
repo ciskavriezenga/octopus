@@ -36,6 +36,7 @@
 #include "clock.hpp"
 #include "fold.hpp"
 #include "join.hpp"
+#include "modulo.hpp"
 #include "sieve.hpp"
 #include "signal.hpp"
 #include "split.hpp"
