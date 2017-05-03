@@ -32,6 +32,7 @@
 // Includes all signals that have to do with arithmetic
 
 #include "division.hpp"
+#include "modulo.hpp"
 #include "negation.hpp"
 #include "product.hpp"
 #include "subtraction.hpp"
