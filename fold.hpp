@@ -48,11 +48,8 @@ namespace octo
     class Fold : public Signal<Out>
     {
     public:
-        //! Construct an empty fold
-        using Signal<Out>::Signal;
-        
         //! Construct a fold with a given number of inputs
-        Fold(Clock* clock, std::size_t size) :
+        Fold(Clock* clock, std::size_t size = 0) :
             Signal<Out>(clock)
         {
             resize(size);
