@@ -80,7 +80,8 @@ namespace octo
         Value(const T& constant = T{}) :
             Signal<T>(nullptr),
             mode(ValueMode::CONSTANT),
-            constant(constant)
+            constant(constant),
+            dirty(true)
         {
             
         }
@@ -116,6 +117,7 @@ namespace octo
             {
                 case ValueMode::CONSTANT:
                     new (&constant) T(rhs.constant);
+                    dirty = true;
                     break;
                 case ValueMode::REFERENCE:
                     reference = rhs.reference;
@@ -136,6 +138,7 @@ namespace octo
             {
                 case ValueMode::CONSTANT:
                     new (&constant) T(rhs.constant);
+                    dirty = true;
                     break;
                 case ValueMode::REFERENCE:
                     reference = rhs.reference;
@@ -161,6 +164,7 @@ namespace octo
                 deconstruct();
                 
                 mode = ValueMode::CONSTANT;
+                dirty = true;
                 new (&this->constant) T(constant);
                 setClock(nullptr);
             }
@@ -224,7 +228,7 @@ namespace octo
                 deconstruct();
                 switch (mode = rhs.mode)
                 {
-                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); setClock(nullptr); break;
+                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); dirty = true; setClock(nullptr); break;
                     case ValueMode::REFERENCE: reference = rhs.reference; setClock(rhs.reference->getClock()); break;
                     case ValueMode::INTERNAL: new (&internal) polymorphic_value<Signal<T>>(rhs.internal); setClock(internal->getClock()); break;
                 }
@@ -255,7 +259,7 @@ namespace octo
                 deconstruct();
                 switch ((mode = rhs.mode))
                 {
-                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); setClock(nullptr); break;
+                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); dirty = true; setClock(nullptr); break;
                     case ValueMode::REFERENCE: reference = rhs.reference; setClock(rhs.reference->getClock()); break;
                     case ValueMode::INTERNAL: new (&internal) polymorphic_value<Signal<T>>(std::move(rhs.internal)); setClock(internal->getClock()); break;
                 }
@@ -341,6 +345,27 @@ namespace octo
             }
         }
         
+        void onUpdate() final override
+        {
+            std::unique_lock<std::mutex> lock(mutex);
+            if (mode == ValueMode::CONSTANT && dirty)
+            {
+                dirty = false;
+                cache = constant;
+            }
+        }
+        
+        const T& getOutput() const final override
+        {
+            std::unique_lock<std::mutex> lock(mutex);
+            switch (mode)
+            {
+                case ValueMode::CONSTANT: return cache;
+                case ValueMode::REFERENCE: return (*reference)();
+                case ValueMode::INTERNAL: return (*internal)();
+            }
+        }
+        
         //! Generate a new sample
         void generateSample(T& out) final override
         {
@@ -391,8 +416,14 @@ namespace octo
             polymorphic_value<Signal<T>> internal;
         };
         
+        //! The actual cache that will be used for output
+        T cache;
+        
+        //! Should the cache be set to the new constant?
+        bool dirty = false;
+        
         //! A mutex for updating the value reference
-        std::mutex mutex;
+        mutable std::mutex mutex;
     };
     
     //! Listener for events that happen to a Value
