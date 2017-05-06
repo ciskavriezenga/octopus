@@ -86,7 +86,7 @@ namespace octo
         const T& operator()()
         {
             update(); // Update the signal as a sink
-            return cache;
+            return getOutput();
         }
         
         //! Retrieve a signal of the sample, relative to the its clock's current timestamp
@@ -107,8 +107,11 @@ namespace octo
         //! Generate a new sample
         virtual void generateSample(T& out) = 0;
         
+        //! Return the output value
+        virtual const T& getOutput() const { return cache; }
+        
         // Inherited from Sink
-        void onUpdate() final override { generateSample(cache); }
+        void onUpdate() override { generateSample(cache); }
         
     private:
         //! A cache for previously generated samples
