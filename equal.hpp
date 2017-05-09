@@ -58,7 +58,9 @@ namespace octo
 		//! Generate the next sample
 		void generateSample(T& y) final override
 		{
-            y = (left() == right()) ? trueValue() : falseValue();
+            const auto& t = trueValue();
+            const auto& f = falseValue();
+            y = (left() == right()) ? t : f;
 		}
 	};
 }
