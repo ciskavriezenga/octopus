@@ -26,20 +26,43 @@
  
  */
 
-#ifndef OCTOPUS_ARITHMETIC_HPP
-#define OCTOPUS_ARITHMETIC_HPP
+#ifndef OCTOPUS_CORE_NOT_EQUAL_HPP
+#define OCTOPUS_CORE_NOT_EQUAL_HPP
 
-// Includes all signals that have to do with arithmetic
+#include <octopus/signal.hpp>
+#include <octopus/value.hpp>
 
-#include "division.hpp"
-#include "equal.hpp"
-#include "greater.hpp"
-#include "less.hpp"
-#include "modulo.hpp"
-#include "negation.hpp"
-#include "not_equal.hpp"
-#include "product.hpp"
-#include "subtraction.hpp"
-#include "sum.hpp"
+namespace octo
+{
+	//! Returns a value if left != right and another value if it's false
+	template <typename T>
+	class NotEqual : public Signal<T>
+	{
+	public:
+		using Signal<T>::Signal;
+        
+    public:
+        //! The left-side value of the not-equal operator
+        Value<float> left = 0;
+        
+        //! The right-side value of the not-equal operator
+        Value<float> right = 0;
+        
+        //! The value to be returned when true
+        Value<float> trueValue = 1;
+        
+        //! The value to be returned when false
+        Value<float> falseValue = 0;
+
+	private:
+		//! Generate the next sample
+		void generateSample(T& y) final override
+		{
+            const auto& t = trueValue();
+            const auto& f = falseValue();
+            y = (left() != right()) ? t : f;
+		}
+	};
+}
 
 #endif
