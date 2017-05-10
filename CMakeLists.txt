@@ -9,7 +9,7 @@ add_definitions(-std=c++14 -Wall)
 include_directories(/usr/local/include)
 
 # Setup the common headers and sources
-set(HEADERS arithmetic.hpp binary_operation.hpp clock.hpp division.hpp equal.hpp fold.hpp greater.hpp join.hpp less.hpp modulo.hpp negation.hpp not_equal.hpp octopus.hpp polymorphic_value.hpp product.hpp sieve.hpp signal.hpp signal_base.hpp sink.hpp split.hpp subtraction.hpp sum.hpp unary_operation.hpp value.hpp)
+set(HEADERS arithmetic.hpp binary_operation.hpp clock.hpp dirty.hpp division.hpp equal.hpp fold.hpp greater.hpp join.hpp list.hpp less.hpp modulo.hpp negation.hpp not_equal.hpp octopus.hpp polymorphic_value.hpp product.hpp sieve.hpp signal.hpp signal_base.hpp sink.hpp split.hpp subtraction.hpp sum.hpp unary_operation.hpp value.hpp)
 set(SOURCES clock.cpp signal_base.cpp sink.cpp)
 
 source_group(\\ FILES ${HEADERS} ${SOURCES})
