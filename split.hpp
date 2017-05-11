@@ -29,8 +29,7 @@
 #ifndef OCTOPUS_SPLIT_HPP
 #define OCTOPUS_SPLIT_HPP
 
-#include <vector>
-
+#include "list.hpp"
 #include "polymorphic_value.hpp"
 #include "sieve.hpp"
 #include "value.hpp"
@@ -58,7 +57,7 @@ namespace octo
         }
         
         //! Construct the split by providing size and input
-        Split(Clock* clock, Value<std::vector<T>> input, std::size_t size) :
+        Split(Clock* clock, Value<List<T>> input, std::size_t size) :
             input(std::move(input))
         {
             resize(size);
@@ -99,7 +98,7 @@ namespace octo
         
     public:
         //! The input to the split
-        Value<std::vector<T>> input;
+        Value<List<T>> input;
         
     private:
         //! The clock to use
