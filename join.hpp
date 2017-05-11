@@ -35,7 +35,7 @@
 namespace octo
 {
     //! Join multiple signals into one multi-channel signal
-    /*! Combines multiple signals of type T into a signal of type std::vector<T>.
+    /*! Combines multiple signals of type T into a signal of type List<T>.
         Signals with a vector type are the common idiom within Octopus for representing
         multi-channel signals.
      
