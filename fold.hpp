@@ -93,7 +93,7 @@ namespace octo
         void generateSample(Out& out) final override
         {
             if (inputs.empty())
-                out = {};
+                out = Out();
             else
                 out = std::accumulate(inputs.begin(), inputs.end(), init(), [&](auto& a, auto& b){ return fold(a, b->pull()); });
         }

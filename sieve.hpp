@@ -29,8 +29,7 @@
 #ifndef OCTOPUS_SIEVE_HPP
 #define OCTOPUS_SIEVE_HPP
 
-#include <vector>
-
+#include "list.hpp"
 #include "unary_operation.hpp"
 
 namespace octo
@@ -40,12 +39,12 @@ namespace octo
         multi-channel signals. Sieves are used to filter out one their channels. If you'd
         like to filter out all channels at once, use a Split. */
     template <class T>
-    class Sieve : public UnaryOperation<std::vector<T>, T>
+    class Sieve : public UnaryOperation<List<T>, T>
     {
     public:
         //! Create the sieve
-        Sieve(Clock* clock, unsigned int channel = 0, Value<std::vector<T>> input = {}) :
-            UnaryOperation<std::vector<T>, T>(clock, std::move(input)),
+        Sieve(Clock* clock, unsigned int channel = 0, Value<List<T>> input = {}) :
+            UnaryOperation<List<T>, T>(clock, std::move(input)),
             channel(channel)
         {
             
@@ -57,9 +56,10 @@ namespace octo
         
     private:
         //! Generated the sifted ouf signal
-        void convertSample(const std::vector<T>& in, T& out) final override
+        void convertSample(const List<T>& list, T& out) final override
         {
-            out = channel < in.size() ? in[channel] : T{};
+            if (list.dirty)
+                out = channel < list.data.size() ? list.data[channel] : T{};
         }
     };
 }
