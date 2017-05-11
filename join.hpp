@@ -29,8 +29,7 @@
 #ifndef OCTOPUS_JOIN_HPP
 #define OCTOPUS_JOIN_HPP
 
-#include <vector>
-
+#include "list.hpp"
 #include "fold.hpp"
 
 namespace octo
@@ -46,10 +45,10 @@ namespace octo
         auto join = sine1 & sine2;
         @endcode*/
     template <class T>
-    class Join : public Fold<T, std::vector<T>>
+    class Join : public Fold<T, List<T>>
     {
     public:        
-        using Fold<T, std::vector<T>>::Fold;
+        using Fold<T, List<T>>::Fold;
         
         //! Add another channel to the join
         template <class U>
@@ -61,13 +60,13 @@ namespace octo
         
     private:
         //! Return the monoid identity
-        std::vector<T> init() const final override { return {}; }
+        List<T> init() const final override { return {}; }
         
         //! The monoid binary operation
-        std::vector<T> fold(const std::vector<T>& acc, const T& x) const final override
+        List<T> fold(const List<T>& acc, const T& x) const final override
         {
             auto y = acc;
-            y.emplace_back(x);
+            y.data.emplace_back(x);
             return y;
         }
     };
