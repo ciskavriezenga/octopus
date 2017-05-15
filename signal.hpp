@@ -91,8 +91,8 @@ namespace octo
         explicit operator T() { return (*this)(); }
         
         // Inherited from SignalBase
-        const std::type_info& getTypeInfo() const final override { return typeid(T); }
-        const void* pullGeneric() final override { return &(*this)(); }
+        const std::type_info& getTypeInfo() const final { return typeid(T); }
+        const void* pullGeneric() final { return &(*this)(); }
         
         //! The type for template meta programming
         using type = T;

@@ -34,8 +34,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "cached_signal.hpp"
 #include "polymorphic_value.hpp"
-#include "signal.hpp"
 #include "value.hpp"
 
 namespace octo
@@ -90,7 +90,7 @@ namespace octo
         
     private:
         //! Generate a new sample
-        void generateSample(Out& out) final override
+        void generateSample(Out& out) final
         {
             if (inputs.empty())
                 out = Out();

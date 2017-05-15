@@ -60,10 +60,10 @@ namespace octo
         
     private:
         //! Return the monoid identity
-        List<T> init() const final override { return {}; }
+        List<T> init() const final { return {}; }
         
         //! The monoid binary operation
-        List<T> fold(const List<T>& acc, const T& x) const final override
+        List<T> fold(const List<T>& acc, const T& x) const final
         {
             auto y = acc;
             y.data.emplace_back(x);

@@ -29,8 +29,8 @@
 #ifndef OCTOPUS_CORE_LESS_HPP
 #define OCTOPUS_CORE_LESS_HPP
 
-#include <octopus/signal.hpp>
-#include <octopus/value.hpp>
+#include "cached_signal.hpp"
+#include "value.hpp"
 
 namespace octo
 {
@@ -56,7 +56,7 @@ namespace octo
 
 	private:
 		//! Generate the next sample
-		void generateSample(T& y) final override
+		void generateSample(T& y) final
 		{
             const auto& t = trueValue();
             const auto& f = falseValue();

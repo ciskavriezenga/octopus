@@ -132,7 +132,7 @@ namespace octo
         
         //! Moving another value into this one
         Value(Value&& rhs) :
-            Signal<T>(nullptr, rhs())
+            Signal<T>(nullptr)
         {
             switch (mode = rhs.mode)
             {
@@ -345,7 +345,7 @@ namespace octo
             }
         }
         
-        void onUpdate() final override
+        void onUpdate() final
         {
             std::unique_lock<std::mutex> lock(mutex);
             if (mode == ValueMode::CONSTANT && dirty)
@@ -355,7 +355,7 @@ namespace octo
             }
         }
         
-        const T& getOutput() const final override
+        const T& getOutput() const final
         {
             std::unique_lock<std::mutex> lock(mutex);
             switch (mode)
@@ -367,7 +367,7 @@ namespace octo
         }
         
         //! Reset the value, because the referenced signal will be destructed
-        void disconnectFromDependent(SignalBase& dependent) final override
+        void disconnectFromDependent(SignalBase& dependent) final
         {
             assert(reference == &dependent);
             reset();

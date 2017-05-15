@@ -52,8 +52,8 @@ namespace octo
         
     private:
         // Inherited from Fold
-        T init() const final override { return 0; }
-        T fold(const T& in, const T& out) const final override { return in + out; }
+        T init() const final { return 0; }
+        T fold(const T& in, const T& out) const final { return in + out; }
     };
     
     // scalar + &

@@ -45,7 +45,7 @@ namespace octo
         
     private:
         //! Generate a new sample
-        void combineSamples(const T& lhs, const T& rhs, T& out) final override
+        void combineSamples(const T& lhs, const T& rhs, T& out) final
         {
             out = lhs - rhs;
         }

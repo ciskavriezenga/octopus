@@ -43,7 +43,7 @@ namespace octo
         
     private:
         //! Generate a negative sample
-        void convertSample(const T& in, T& out) final override
+        void convertSample(const T& in, T& out) final
         {
             out = -in;
         }

@@ -29,7 +29,7 @@
 #ifndef OCTOPUS_UNARY_OPERATION_HPP
 #define OCTOPUS_UNARY_OPERATION_HPP
 
-#include "signal.hpp"
+#include "cached_signal.hpp"
 #include "value.hpp"
 
 namespace octo
@@ -56,7 +56,7 @@ namespace octo
         virtual void convertSample(const In& in, Out& out) = 0;
         
         //! Generate a new sample by transforming it from input to output
-        void generateSample(Out& out) final override
+        void generateSample(Out& out) final
         {
             convertSample(input(), out);
         }

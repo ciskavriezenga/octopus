@@ -56,7 +56,7 @@ namespace octo
         
     private:
         //! Generated the sifted ouf signal
-        void convertSample(const List<T>& list, T& out) final override
+        void convertSample(const List<T>& list, T& out) final
         {
             if (list.dirty)
                 out = channel < list.data.size() ? list.data[channel] : T{};

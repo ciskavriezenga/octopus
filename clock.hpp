@@ -101,14 +101,14 @@ namespace octo
         void setRate(float rateInHertz) { rate_ = rateInHertz; }
         
         //! Return the rate at which the clock runs (in Hertz)
-        float rate() const final override { return rate_; }
+        float rate() const final { return rate_; }
         
         //! Return the clocks current time index
-        uint64_t now() const final override { return timestamp; }
+        uint64_t now() const final { return timestamp; }
         
     private:
         //! Move the clock to its next time index
-        void onTick() final override { ++timestamp; }
+        void onTick() final { ++timestamp; }
         
     private:
         //! The rate at which the clock runs
@@ -136,14 +136,14 @@ namespace octo
         VariableClock(float startingRateInHertz);
         
         //! Return the rate at which the clock runs (in Hertz)
-        float rate() const final override { return rate_; }
+        float rate() const final { return rate_; }
         
         //! Return the clocks current time index
-        uint64_t now() const final override { return timestamp; }
+        uint64_t now() const final { return timestamp; }
         
     private:
         //! Move the clock to its next time index
-        void onTick() final override;
+        void onTick() final;
         
     private:
         //! The rate at which the clock currently runs

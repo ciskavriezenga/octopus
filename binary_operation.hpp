@@ -66,7 +66,7 @@ namespace octo
         
     private:
         //! Generate a new sample
-        void generateSample(T& out) final override
+        void generateSample(T& out) final
         {
             combineSamples(left(), right(), out);
         }
