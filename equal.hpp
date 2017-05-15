@@ -36,10 +36,10 @@ namespace octo
 {
 	//! Returns a value if left == right and another value if it's false
 	template <typename T>
-	class Equal : public Signal<T>
+	class Equal : public CachedSignal<T>
 	{
 	public:
-		using Signal<T>::Signal;
+		using CachedSignal<T>::CachedSignal;
         
     public:
         //! The left-side value of the equal operator

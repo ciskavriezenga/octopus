@@ -26,43 +26,43 @@
  
  */
 
-#ifndef OCTOPUS_CORE_LESS_HPP
-#define OCTOPUS_CORE_LESS_HPP
+#ifndef OCTOPUS_CACHED_SIGNAL_HPP
+#define OCTOPUS_CACHED_SIGNAL_HPP
 
-#include <octopus/signal.hpp>
-#include <octopus/value.hpp>
+#include "signal.hpp"
 
 namespace octo
 {
-	//! Returns a value if left < right and another value if it's false
-	template <typename T>
-	class Less : public CachedSignal<T>
-	{
-	public:
-		using CachedSignal<T>::CachedSignal;
-        
+    //! Signal keeping a cache of newly generated samples
+    template <class T>
+    class CachedSignal : public Signal<T>
+    {
     public:
-        //! The left-side value of the less-than operator
-        Value<float> left = 0;
+        //! Construct the signal
+        CachedSignal(Clock* clock, const T& initialCache = T{}) :
+            SignalBase(clock),
+            cache(initialCache)
+        {
+            
+        }
         
-        //! The right-side value of the less-than operator
-        Value<float> right = 0;
+        //! Virtual destructor, because this is a base class
+        virtual ~CachedSignal() = default;
         
-        //! The value to be returned when true
-        Value<float> trueValue = 1;
+    private:
+        //! Generate a new sample
+        virtual void generateSample(T& out) = 0;
         
-        //! The value to be returned when false
-        Value<float> falseValue = 0;
-
-	private:
-		//! Generate the next sample
-		void generateSample(T& y) final override
-		{
-            const auto& t = trueValue();
-            const auto& f = falseValue();
-            y = (left() < right()) ? t : f;
-		}
-	};
+        //! Generate a new cache sample on each clock update
+        void onUpdate() final { generateSample(cache); }
+        
+        //! Return the cache as output value
+        const T& getOutput() const final { return cache; }
+        
+    private:
+        //! A cache for previously generated samples
+        T cache = T{};
+    };
 }
 
-#endif
+#endif /* OCTOPUS_CACHED_SIGNAL_HPP */

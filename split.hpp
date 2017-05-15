@@ -75,6 +75,7 @@ namespace octo
             for (auto i = oldSize; i < size; ++i)
             {
                 sieves[i] = make_polymorphic_value<Sieve<T>>(clock, static_cast<unsigned int>(i));
+                sieves[i]->setPersistency(persistent);
                 sieves[i]->input = input;
             }
         }
@@ -96,6 +97,17 @@ namespace octo
                 sieve->setClock(clock);
         }
         
+        //! Change the persistency for all sieves
+        void setPersistency(bool persistent)
+        {
+            if (persistent == this->persistent)
+                return;
+            
+            this->persistent = persistent;
+            for (auto& sieve : sieves)
+                sieve->setPersistency(persistent);
+        }
+        
     public:
         //! The input to the split
         Value<List<T>> input;
@@ -103,6 +115,9 @@ namespace octo
     private:
         //! The clock to use
         Clock* clock = nullptr;
+        
+        //! The persistency for all sieves
+        bool persistent = false;
         
         //! The sieves that make up this split
         std::vector<polymorphic_value<Sieve<T>>> sieves;
