@@ -40,7 +40,7 @@ namespace octo
     public:
         //! Construct the signal
         CachedSignal(Clock* clock, const T& initialCache = T{}) :
-            SignalBase(clock),
+            Signal<T>(clock),
             cache(initialCache)
         {
             
