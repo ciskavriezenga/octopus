@@ -45,19 +45,19 @@ namespace octo
         take multiple signals of the same type and fold them into a single output signal. Sum and
         Product are good examples (they fold by applying + or * on each input signal). */
     template <class In, class Out = In>
-    class Fold : public Signal<Out>
+    class Fold : public CachedSignal<Out>
     {
     public:
         //! Construct a fold with a given number of inputs
         Fold(Clock* clock) :
-            Signal<Out>(clock)
+            CachedSignal<Out>(clock)
         {
             
         }
         
         //! Construct a fold with two terms
         Fold(Clock* clock, Value<In> lhs, Value<In> rhs) :
-            Signal<Out>(clock)
+            CachedSignal<Out>(clock)
         {
             this->emplace(std::move(lhs));
             this->emplace(std::move(rhs));

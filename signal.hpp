@@ -70,13 +70,7 @@ namespace octo
     class Signal : public SignalBase
     {
     public:
-        //! Construct the signal
-        Signal(Clock* clock, const T& initialCache = T{}) :
-            SignalBase(clock),
-            cache(initialCache)
-        {
-            
-        }
+        using SignalBase::SignalBase;
         
         //! Virtual destructor, because this is a base class
         virtual ~Signal() = default;
@@ -104,14 +98,8 @@ namespace octo
         using type = T;
         
     private:
-        //! Generate a new sample
-        virtual void generateSample(T& out) = 0;
-        
         //! Return the output value
-        virtual const T& getOutput() const { return cache; }
-        
-        // Inherited from Sink
-        void onUpdate() override { generateSample(cache); }
+        virtual const T& getOutput() const = 0;
         
     private:
         //! A cache for previously generated samples

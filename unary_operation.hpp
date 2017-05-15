@@ -36,12 +36,12 @@ namespace octo
 {
     //! Applies a unary operation on a single input signal
     template <class In, class Out = In>
-    class UnaryOperation : public Signal<Out>
+    class UnaryOperation : public CachedSignal<Out>
     {
     public:
         //! Construct the unary operation
         UnaryOperation(Clock* clock, Value<In> input = In{}) :
-            Signal<Out>(clock),
+            CachedSignal<Out>(clock),
             input(std::move(input))
         {
             

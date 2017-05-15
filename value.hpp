@@ -366,18 +366,6 @@ namespace octo
             }
         }
         
-        //! Generate a new sample
-        void generateSample(T& out) final override
-        {
-            std::unique_lock<std::mutex> lock(mutex);
-            switch (mode)
-            {
-                case ValueMode::CONSTANT: out = constant; break;
-                case ValueMode::REFERENCE: out = (*reference)(); break;
-                case ValueMode::INTERNAL: out = (*internal)(); break;
-            }
-        }
-        
         //! Reset the value, because the referenced signal will be destructed
         void disconnectFromDependent(SignalBase& dependent) final override
         {

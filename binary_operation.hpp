@@ -31,19 +31,19 @@
 
 #include <stdexcept>
 
-#include "signal.hpp"
+#include "cached_signal.hpp"
 #include "value.hpp"
 
 namespace octo
 {
     //! Applies a binary operation on two input signals
     template <class T>
-    class BinaryOperation : public Signal<T>
+    class BinaryOperation : public CachedSignal<T>
     {
     public:
         //! Construct an empty binary operation
         BinaryOperation(Clock* clock, const T& initialCache = T{}) :
-            Signal<T>(clock, initialCache)
+            CachedSignal<T>(clock, initialCache)
         {
             
         }
