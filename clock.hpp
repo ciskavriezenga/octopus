@@ -49,7 +49,7 @@ namespace octo
         virtual float rate() const = 0;
         
         //! Return the delta between ticks (in seconds)
-        virtual float delta() const { return 1.0 / rate(); }
+        virtual float delta() const { return 1.0f / rate(); }
         
         //! Move the clock forward to its next frame
         /*! Ticking a clock means that all sinks/signals that are set to
