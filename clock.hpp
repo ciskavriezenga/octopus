@@ -68,9 +68,13 @@ namespace octo
         //! Is a signal persistent for this clock?
         bool isSinkPersistent(const Sink& sink) const;
         
+    public:
+        //! Called when the clock was ticked
+        std::function<void()> onTick;
+        
     private:
         //! Move the clock to its next time index
-        virtual void onTick() = 0;
+        virtual void ticked() = 0;
         
     private:
         //! The sinks that will be updated with each tick
@@ -108,7 +112,7 @@ namespace octo
         
     private:
         //! Move the clock to its next time index
-        void onTick() final { ++timestamp; }
+        void ticked() final { ++timestamp; }
         
     private:
         //! The rate at which the clock runs
@@ -143,7 +147,7 @@ namespace octo
         
     private:
         //! Move the clock to its next time index
-        void onTick() final;
+        void ticked() final;
         
     private:
         //! The rate at which the clock currently runs

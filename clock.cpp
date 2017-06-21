@@ -32,13 +32,16 @@ namespace octo
 {
 	uint64_t Clock::tick()
     {
-        onTick();
+        ticked();
         
         {
             std::unique_lock<std::mutex> lock(persistencyMutex);
             for (auto& sink : persistentSinks)
                 sink->update();
         }
+        
+        if (onTick)
+            onTick();
         
         return now();
     }
@@ -59,12 +62,16 @@ namespace octo
     {
         return persistentSinks.count(const_cast<Sink*>(&sink));
     }
+    
+// --- InvariableClock --- //
 
     InvariableClock::InvariableClock(float rateInHertz) :
         rate_(rateInHertz)
     {
         
     }
+    
+// --- VariableClock --- //
 
     VariableClock::VariableClock(float startingRateInHertz) :
         rate_(startingRateInHertz)
@@ -72,7 +79,7 @@ namespace octo
         lastNow = std::chrono::high_resolution_clock::now();
     }
 
-    void VariableClock::onTick()
+    void VariableClock::ticked()
     {
         auto now = std::chrono::high_resolution_clock::now();
         rate_ = 1.0f / std::chrono::duration_cast<std::chrono::duration<float>>(now - lastNow).count();
