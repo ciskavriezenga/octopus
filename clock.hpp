@@ -137,7 +137,7 @@ namespace octo
     public:
         //! Construct the clock
         /*! @param startingRateInHertz The rate at which the clocks starts running (will be influenced by subsequent ticks) */
-        VariableClock(float startingRateInHertz);
+        VariableClock(float maximalRate);
         
         //! Return the rate at which the clock runs (in Hertz)
         float rate() const final { return rate_; }
@@ -150,6 +150,9 @@ namespace octo
         void ticked() final;
         
     private:
+        //! The maximal rate at which the clock should run
+        float maximalRate = 0;
+        
         //! The rate at which the clock currently runs
         float rate_ = 0;
         

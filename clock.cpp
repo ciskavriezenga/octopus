@@ -26,7 +26,11 @@
  
  */
 
+#include <thread>
+
 #include "clock.hpp"
+
+using namespace std::chrono;
 
 namespace octo
 {
@@ -73,18 +77,28 @@ namespace octo
     
 // --- VariableClock --- //
 
-    VariableClock::VariableClock(float startingRateInHertz) :
-        rate_(startingRateInHertz)
+    VariableClock::VariableClock(float maximalRate) :
+        maximalRate(maximalRate),
+        rate_(maximalRate)
     {
         lastNow = std::chrono::high_resolution_clock::now();
     }
 
     void VariableClock::ticked()
     {
-        auto now = std::chrono::high_resolution_clock::now();
-        rate_ = 1.0f / std::chrono::duration_cast<std::chrono::duration<float>>(now - lastNow).count();
-        lastNow = now;
+        auto now = high_resolution_clock::now();
+        auto diff = duration_cast<std::chrono::duration<float>>(now - lastNow);
         
+        if (diff.count() < 1.0 / maximalRate)
+        {
+            std::this_thread::sleep_for(diff);
+            rate_ = maximalRate;
+            lastNow += duration_cast<high_resolution_clock::duration>(duration<double>(1.0 / maximalRate));
+        } else {
+            rate_ = 1.0f / diff.count();
+            lastNow = now;
+        }
+
         ++timestamp;
     }
 }
