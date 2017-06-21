@@ -142,6 +142,12 @@ namespace octo
         //! Return the rate at which the clock runs (in Hertz)
         float rate() const final { return rate_; }
         
+        //! Set the maximal sample rate of the clock (in Hertz)
+        void setMaximalRate(float rateInHertz) { maximalRate = rateInHertz; }
+        
+        //! Return the maximal rate at which the clock can run (in Hertz)
+        float getMaximalRate() const { return maximalRate; }
+        
         //! Return the clocks current time index
         uint64_t now() const final { return timestamp; }
         
