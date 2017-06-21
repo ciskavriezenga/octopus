@@ -37,7 +37,7 @@ namespace octo
         clock(clock)
     {
         if (clock)
-            timestamp = clock->now();
+            timestamp = clock->getNow();
     }
 
     Sink::~Sink()
@@ -51,7 +51,7 @@ namespace octo
         if (!clock)
             return onUpdate();
         
-        const auto now = clock->now();
+        const auto now = clock->getNow();
         
         // Do we need updating?
         if (timestamp >= now && started)
@@ -80,7 +80,7 @@ namespace octo
         // If we've moved to a new clock (instead of no clock at all), set some data
         if (clock)
         {
-            timestamp = clock->now();
+            timestamp = clock->getNow();
             
             if (persistent)
                 this->clock->addPersistentSink(*this);
@@ -122,13 +122,13 @@ namespace octo
         return clock ? clock->isSinkPersistent(*this) : false;
     }
     
-    float Sink::rate() const
+    float Sink::getRate() const
     {
-        return clock ? clock->rate() : 0;
+        return clock ? clock->getRate() : 0;
     }
     
-    float Sink::delta() const
+    float Sink::getDelta() const
     {
-        return clock ? clock->delta() : 0;
+        return clock ? clock->getDelta() : 0;
     }
 }

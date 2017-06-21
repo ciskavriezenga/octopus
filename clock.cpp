@@ -47,7 +47,7 @@ namespace octo
         if (onTick)
             onTick();
         
-        return now();
+        return getNow();
     }
     
     void Clock::addPersistentSink(Sink& sink)

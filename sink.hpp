@@ -70,10 +70,10 @@ namespace octo
         
     protected:
         //! Return the current rate of the clock
-        float rate() const;
+        float getRate() const;
         
         //! Return the current delta of the clock
-        float delta() const;
+        float getDelta() const;
         
     protected:
         //! The clock this sink runs at

@@ -46,10 +46,10 @@ namespace octo
         virtual ~Clock() = default;
         
         //! Return the rate at which the clock runs (in Hertz)
-        virtual float rate() const = 0;
+        virtual float getRate() const = 0;
         
         //! Return the delta between ticks (in seconds)
-        virtual float delta() const { return 1.0f / rate(); }
+        virtual float getDelta() const { return 1.0f / getRate(); }
         
         //! Move the clock forward to its next frame
         /*! Ticking a clock means that all sinks/signals that are set to
@@ -57,7 +57,7 @@ namespace octo
         uint64_t tick();
         
         //! Return the clocks current time index
-        virtual uint64_t now() const = 0;
+        virtual uint64_t getNow() const = 0;
         
         //! Add a signal as persistent
         void addPersistentSink(Sink& sink);
@@ -105,10 +105,10 @@ namespace octo
         void setRate(float rateInHertz) { rate_ = rateInHertz; }
         
         //! Return the rate at which the clock runs (in Hertz)
-        float rate() const final { return rate_; }
+        float getRate() const final { return rate_; }
         
         //! Return the clocks current time index
-        uint64_t now() const final { return timestamp; }
+        uint64_t getNow() const final { return timestamp; }
         
     private:
         //! Move the clock to its next time index
@@ -140,7 +140,7 @@ namespace octo
         VariableClock(float maximalRate);
         
         //! Return the rate at which the clock runs (in Hertz)
-        float rate() const final { return rate_; }
+        float getRate() const final { return rate_; }
         
         //! Set the maximal sample rate of the clock (in Hertz)
         void setMaximalRate(float rateInHertz) { maximalRate = rateInHertz; }
@@ -149,7 +149,7 @@ namespace octo
         float getMaximalRate() const { return maximalRate; }
         
         //! Return the clocks current time index
-        uint64_t now() const final { return timestamp; }
+        uint64_t getNow() const final { return timestamp; }
         
     private:
         //! Move the clock to its next time index
