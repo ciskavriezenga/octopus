@@ -33,35 +33,24 @@
 
 namespace octo
 {
-    //! Inverse a signal
-    template <class T>
-    class Inverse : public UnaryOperation<T>
+    //! Invert a signal
+    template <class In, class Out = In>
+    class Inverse : public UnaryOperation<In, Out>
     {
     public:
         // Use the constructor from UnaryOperation
-        using UnaryOperation<T>::UnaryOperation;
+        using UnaryOperation<In, Out>::UnaryOperation;
         
     private:
         //! Generate a negative sample
-        void convertSample(const T& in, T& out) final
+        void convertSample(const In& in, Out& out) final
         {
-            in != 0 ? out = 1 / in : out = 0;
+            if (in == In(0))
+                out = Out(0);
+            else
+                out = std::common_type_t<In, Out>(1) / in;
         }
     };
-    
-    //! Operator overload for negating signals
-    template <typename T, typename = std::enable_if_t<std::is_base_of<Sink, typename std::decay_t<T>>::value>>
-    Inverse<typename T::type> operator-(T& signal)
-    {
-        return {signal.getClock(), signal};
-    }
-    
-    //! Operator overload for negating signals
-    template <typename T, typename = std::enable_if_t<std::is_base_of<Sink, typename std::decay_t<T>>::value>>
-    Inverse<typename T::type> operator-(T&& signal)
-    {
-        return {signal.getClock(), std::move(signal)};
-    }
 }
 
 #endif
