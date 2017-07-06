@@ -164,9 +164,10 @@ namespace octo
                 deconstruct();
                 
                 mode = ValueMode::CONSTANT;
-                dirty = true;
                 new (&this->constant) T(constant);
                 setClock(nullptr);
+                
+                dirty = true;
             }
             
             notifyConstantSet();
@@ -220,17 +221,25 @@ namespace octo
             if (&rhs == this)
                 return *this;
             
-            if (mode != rhs.mode ||
-                (isConstant() && constant != rhs.constant) ||
-                (isReference() && reference != rhs.reference))
+            if (mode != rhs.mode || (isConstant() && constant != rhs.constant) || (isReference() && reference != rhs.reference))
             {
                 std::unique_lock<std::mutex> lock(mutex);
                 deconstruct();
                 switch (mode = rhs.mode)
                 {
-                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); dirty = true; setClock(nullptr); break;
-                    case ValueMode::REFERENCE: reference = rhs.reference; setClock(rhs.reference->getClock()); break;
-                    case ValueMode::INTERNAL: new (&internal) polymorphic_value<Signal<T>>(rhs.internal); setClock(internal->getClock()); break;
+                    case ValueMode::CONSTANT:
+                        new (&constant) T(rhs.constant);
+                        dirty = true;
+                        setClock(nullptr);
+                        break;
+                    case ValueMode::REFERENCE:
+                        new (&reference) Signal<T>*(rhs.reference);
+                        setClock(rhs.reference->getClock());
+                        break;
+                    case ValueMode::INTERNAL:
+                        new (&internal) polymorphic_value<Signal<T>>(rhs.internal);
+                        setClock(internal->getClock());
+                        break;
                 }
             }
             
@@ -238,8 +247,8 @@ namespace octo
             switch (mode)
             {
                 case ValueMode::CONSTANT: notifyConstantSet(); break;
-                case ValueMode::REFERENCE: notifyConstantSet(); break;
-                case ValueMode::INTERNAL: notifyConstantSet(); break;
+                case ValueMode::REFERENCE: notifySignalSet(); break;
+                case ValueMode::INTERNAL: notifySignalSet(); break;
             }
             
             return *this;
@@ -251,17 +260,25 @@ namespace octo
             if (&rhs == this)
                 return *this;
             
-            if (mode != rhs.mode ||
-                (isConstant() && constant != rhs.constant) ||
-                (isReference() && reference != rhs.reference))
+            if (mode != rhs.mode || (isConstant() && constant != rhs.constant) || (isReference() && reference != rhs.reference))
             {
                 std::unique_lock<std::mutex> lock(mutex);
                 deconstruct();
                 switch ((mode = rhs.mode))
                 {
-                    case ValueMode::CONSTANT: new (&constant) T(rhs.constant); dirty = true; setClock(nullptr); break;
-                    case ValueMode::REFERENCE: reference = rhs.reference; setClock(rhs.reference->getClock()); break;
-                    case ValueMode::INTERNAL: new (&internal) polymorphic_value<Signal<T>>(std::move(rhs.internal)); setClock(internal->getClock()); break;
+                    case ValueMode::CONSTANT:
+                        new (&constant) T(rhs.constant);
+                        dirty = true;
+                        setClock(nullptr);
+                        break;
+                    case ValueMode::REFERENCE:
+                        new (&reference) Signal<T>*(rhs.reference);
+                        setClock(rhs.reference->getClock());
+                        break;
+                    case ValueMode::INTERNAL:
+                        new (&internal) polymorphic_value<Signal<T>>(std::move(rhs.internal));
+                        setClock(internal->getClock());
+                        break;
                 }
             }
             
@@ -269,8 +286,8 @@ namespace octo
             switch (mode)
             {
                 case ValueMode::CONSTANT: notifyConstantSet(); break;
-                case ValueMode::REFERENCE: notifyConstantSet(); break;
-                case ValueMode::INTERNAL: notifyConstantSet(); break;
+                case ValueMode::REFERENCE: notifySignalSet(); break;
+                case ValueMode::INTERNAL: notifySignalSet(); break;
             }
             
             rhs.reset();
@@ -285,7 +302,7 @@ namespace octo
         //! Reset a signal to its unconnected state
         void reset()
         {
-            *this = T{};
+            *this = T();
         }
         
         //! Is this value a constant?
@@ -337,7 +354,7 @@ namespace octo
                     break;
                 case ValueMode::REFERENCE:
                     reference->dependees.erase(this);
-                    reference = nullptr;
+                    reference.~Signal<T>();
                     break;
                 case ValueMode::INTERNAL:
                     internal.~polymorphic_value();
