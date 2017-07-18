@@ -136,7 +136,7 @@ namespace octo
     {
     public:
         //! Construct the clock
-        /*! @param startingRateInHertz The rate at which the clocks starts running (will be influenced by subsequent ticks) */
+        /*! @param maximalRate The rate at which the clocks starts running (will be influenced by subsequent ticks) */
         VariableClock(float maximalRate);
         
         //! Return the rate at which the clock runs (in Hertz)
