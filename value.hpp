@@ -30,7 +30,6 @@
 #define OCTOPUS_VALUE_HPP
 
 #include <cassert>
-#include <mutex>
 #include <set>
 #include <stdexcept>
 
@@ -159,16 +158,13 @@ namespace octo
         //! Assign a new constant to the value
         Value& operator=(const T& constant)
         {
-            {
-                std::unique_lock<std::mutex> lock(mutex);
-                deconstruct();
-                
-                mode = ValueMode::CONSTANT;
-                new (&this->constant) T(constant);
-                setClock(nullptr);
-                
-                dirty = true;
-            }
+            deconstruct();
+            
+            mode = ValueMode::CONSTANT;
+            new (&this->constant) T(constant);
+            setClock(nullptr);
+            
+            dirty = true;
             
             notifyConstantSet();
             
@@ -181,16 +177,13 @@ namespace octo
             if (isReference() && this->reference == &reference)
                 return *this;
             
-            {
-                std::unique_lock<std::mutex> lock(mutex);
-                deconstruct();
-                
-                mode = ValueMode::REFERENCE;
-                new (&this->reference) Signal<T>*(&reference);
-                
-                reference.dependees.emplace(this);
-                setClock(reference.getClock());
-            }
+            deconstruct();
+            
+            mode = ValueMode::REFERENCE;
+            new (&this->reference) Signal<T>*(&reference);
+            
+            reference.dependees.emplace(this);
+            setClock(reference.getClock());
             
             notifySignalSet();
             
@@ -200,15 +193,12 @@ namespace octo
         //! Have the value contain another signal
         template <class U>
         std::enable_if_t<std::is_base_of<Signal<T>, U>::value, Value>& operator=(U&& internal)
-        {            
-            {
-                std::unique_lock<std::mutex> lock(mutex);
-                deconstruct();
-                
-                mode = ValueMode::INTERNAL;
-                new (&this->internal) polymorphic_value<U>(std::move(internal));
-                setClock(this->internal->getClock());
-            }
+        {
+            deconstruct();
+            
+            mode = ValueMode::INTERNAL;
+            new (&this->internal) polymorphic_value<U>(std::move(internal));
+            setClock(this->internal->getClock());
             
             notifySignalSet();
             
@@ -223,7 +213,6 @@ namespace octo
             
             if (mode != rhs.mode || (isConstant() && constant != rhs.constant) || (isReference() && reference != rhs.reference))
             {
-                std::unique_lock<std::mutex> lock(mutex);
                 deconstruct();
                 switch (mode = rhs.mode)
                 {
@@ -262,7 +251,6 @@ namespace octo
             
             if (mode != rhs.mode || (isConstant() && constant != rhs.constant) || (isReference() && reference != rhs.reference))
             {
-                std::unique_lock<std::mutex> lock(mutex);
                 deconstruct();
                 switch ((mode = rhs.mode))
                 {
@@ -364,7 +352,6 @@ namespace octo
         
         void onUpdate() final
         {
-            std::unique_lock<std::mutex> lock(mutex);
             if (mode == ValueMode::CONSTANT && dirty)
             {
                 dirty = false;
@@ -374,7 +361,6 @@ namespace octo
         
         const T& getOutput() const final
         {
-            std::unique_lock<std::mutex> lock(mutex);
             switch (mode)
             {
                 case ValueMode::CONSTANT: return cache;
@@ -426,9 +412,6 @@ namespace octo
         
         //! Should the cache be set to the new constant?
         bool dirty = false;
-        
-        //! A mutex for updating the value reference
-        mutable std::mutex mutex;
     };
     
     //! Listener for events that happen to a Value
