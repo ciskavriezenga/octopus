@@ -57,8 +57,24 @@ namespace octo
         T& operator[](std::size_t index) { return data[index]; }
         const T& operator[](std::size_t index) const { return data[index]; }
         
+        void clear()
+        {
+            if (data.empty())
+                return;
+            
+            data.clear();
+            dirty = true;
+        }
+        
         bool empty() const { return data.empty(); }
         std::size_t size() const { return data.size(); }
+        
+        auto begin() { return data.begin(); }
+        auto begin() const { return data.begin(); }
+        auto cbegin() const { return data.cbegin(); }
+        auto end() { return data.end(); }
+        auto end() const { return data.end(); }
+        auto cend() const { return data.cend(); }
         
     public:
         std::vector<T> data;
