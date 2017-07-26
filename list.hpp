@@ -40,14 +40,14 @@ namespace octo
     class Dirty<std::vector<T>>
     {
     public:
-        Dirty& operator=(const T& rhs)
+        Dirty& operator=(const std::vector<T>& rhs)
         {
             data = rhs;
             dirty = true;
             return *this;
         }
         
-        Dirty& operator=(T&& rhs)
+        Dirty& operator=(std::vector<T>&& rhs)
         {
             data = std::move(rhs);
             dirty = true;
