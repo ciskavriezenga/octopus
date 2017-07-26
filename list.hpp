@@ -35,6 +35,37 @@
 
 namespace octo
 {
+    //! Template specialization of Dirty for std::vectors
+    template <typename T>
+    class Dirty<std::vector<T>>
+    {
+    public:
+        Dirty& operator=(const T& rhs)
+        {
+            data = rhs;
+            dirty = true;
+            return *this;
+        }
+        
+        Dirty& operator=(T&& rhs)
+        {
+            data = std::move(rhs);
+            dirty = true;
+            return *this;
+        }
+        
+        T& operator[](std::size_t index) { return data[index]; }
+        const T& operator[](std::size_t index) const { return data[index]; }
+        
+        bool empty() const { return data.empty(); }
+        std::size_t size() const { return data.size(); }
+        
+    public:
+        std::vector<T> data;
+        bool dirty = true;
+    };
+    
+    //! A Dirty of std::vector is also called a List
     template <typename T>
     using List = Dirty<std::vector<T>>;
 }
