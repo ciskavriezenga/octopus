@@ -153,7 +153,16 @@ namespace octo
         }
         
         //! Destruct the value and release any contained data
-        ~Value() { reset(); assert(listeners.empty()); }
+        ~Value()
+        {
+            reset();
+            
+            auto listeners_ = listeners;
+            for (auto& listener : listeners_)
+                listener->valueWillBeDestructed(*this);
+            
+            assert(listeners.empty());
+        }
         
         //! Assign a new constant to the value
         Value& operator=(const T& constant)
@@ -425,11 +434,14 @@ namespace octo
         virtual ~Listener() = default;
         
     protected:
+        //! Lets the listener know the value will be destructed, and it should unregister as listener
+        virtual void valueWillBeDestructed(Value& value) { }
+        
         //! Called when the value is set to a constant
-        virtual void setToConstant(Value<T>& value, const T& constant) = 0;
+        virtual void setToConstant(Value& value, const T& constant) = 0;
         
         //! Called when the value is set to a signal
-        virtual void setToSignal(Value<T>& value, Signal<T>& signal) = 0;
+        virtual void setToSignal(Value& value, Signal<T>& signal) = 0;
     };
     
     //! Compare two values for equality
