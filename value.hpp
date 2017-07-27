@@ -220,36 +220,12 @@ namespace octo
             if (&rhs == this)
                 return *this;
             
-            if (mode != rhs.mode || (isConstant() && constant != rhs.constant) || (isReference() && reference != rhs.reference))
+            switch (rhs.mode)
             {
-                deconstruct();
-                switch (mode = rhs.mode)
-                {
-                    case ValueMode::CONSTANT:
-                        new (&constant) T(rhs.constant);
-                        dirty = true;
-                        setClock(nullptr);
-                        break;
-                    case ValueMode::REFERENCE:
-                        new (&reference) Signal<T>*(rhs.reference);
-                        setClock(rhs.reference->getClock());
-                        break;
-                    case ValueMode::INTERNAL:
-                        new (&internal) polymorphic_value<Signal<T>>(rhs.internal);
-                        setClock(internal->getClock());
-                        break;
-                }
+                case ValueMode::CONSTANT: return *this = rhs.constant;
+                case ValueMode::REFERENCE: return *this = rhs.reference;
+                case ValueMode::INTERNAL: return *this = rhs.internal;
             }
-            
-            // We're notifying in a different switch, so that we can unlock the mutex earlier
-            switch (mode)
-            {
-                case ValueMode::CONSTANT: notifyConstantSet(); break;
-                case ValueMode::REFERENCE: notifySignalSet(); break;
-                case ValueMode::INTERNAL: notifySignalSet(); break;
-            }
-            
-            return *this;
         }
         
         //! Moving from another Value
@@ -258,38 +234,12 @@ namespace octo
             if (&rhs == this)
                 return *this;
             
-            if (mode != rhs.mode || (isConstant() && constant != rhs.constant) || (isReference() && reference != rhs.reference))
+            switch (rhs.mode)
             {
-                deconstruct();
-                switch ((mode = rhs.mode))
-                {
-                    case ValueMode::CONSTANT:
-                        new (&constant) T(rhs.constant);
-                        dirty = true;
-                        setClock(nullptr);
-                        break;
-                    case ValueMode::REFERENCE:
-                        new (&reference) Signal<T>*(rhs.reference);
-                        setClock(rhs.reference->getClock());
-                        break;
-                    case ValueMode::INTERNAL:
-                        new (&internal) polymorphic_value<Signal<T>>(std::move(rhs.internal));
-                        setClock(internal->getClock());
-                        break;
-                }
+                case ValueMode::CONSTANT: *this = std::move(rhs.constant);
+                case ValueMode::REFERENCE: *this = std::move(rhs.reference);
+                case ValueMode::INTERNAL: *this = std::move(rhs.internal);
             }
-            
-            // We're notifying in a different switch, so that we can unlock the mutex earlier
-            switch (mode)
-            {
-                case ValueMode::CONSTANT: notifyConstantSet(); break;
-                case ValueMode::REFERENCE: notifySignalSet(); break;
-                case ValueMode::INTERNAL: notifySignalSet(); break;
-            }
-            
-            rhs.reset();
-            
-            return *this;
         }
         
         //! Reference another Value
