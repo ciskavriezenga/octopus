@@ -9,7 +9,7 @@
 #ifndef OCTOPUS_CONSTANT_HPP
 #define OCTOPUS_CONSTANT_HPP
 
-#include <cached_signal.hpp>
+#include "cached_signal.hpp"
 
 namespace octo
 {
@@ -20,7 +20,7 @@ namespace octo
     public:
         //! Construct the constant
         Constant(Clock* clock, const T& initialValue) :
-            CachedSignal<T>(clock) :
+            CachedSignal<T>(clock),
             constant(initialValue)
         {
             
