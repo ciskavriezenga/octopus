@@ -167,6 +167,9 @@ namespace octo
         //! Assign a new constant to the value
         Value& operator=(const T& constant)
         {
+            if (isConstant() && this->constant == constant)
+                return *this;
+            
             deconstruct();
             
             mode = ValueMode::CONSTANT;

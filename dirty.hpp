@@ -53,6 +53,18 @@ namespace octo
         T data;
         bool dirty = true;
     };
+    
+    template <typename T>
+    bool operator==(const Dirty<T>& lhs, const Dirty<T>& rhs)
+    {
+        return lhs.data == rhs.data;
+    }
+    
+    template <typename T>
+    bool operator!=(const Dirty<T>& lhs, const Dirty<T>& rhs)
+    {
+        return lhs.data != rhs.data;
+    }
 }
 
 #endif /* OCTOPUS_DIRTY_HPP */
