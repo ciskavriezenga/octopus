@@ -54,8 +54,8 @@ namespace octo
             return *this;
         }
         
-        T& operator[](std::size_t index) { return data[index % data.size()]; }
-        const T& operator[](std::size_t index) const { return data[index % data.size()]; }
+        T& operator[](std::size_t index) { return data.size() ? data[index % data.size()] : defaultValue; }
+        const T& operator[](std::size_t index) const { return data.size() ? data[index % data.size()] : defaultValue; }
         
         void clear()
         {
@@ -77,7 +77,10 @@ namespace octo
         auto cend() const { return data.cend(); }
         
     public:
+        
         std::vector<T> data;
+        
+        T defaultValue;
         bool dirty = true;
     };
     
