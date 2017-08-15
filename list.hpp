@@ -54,8 +54,8 @@ namespace octo
             return *this;
         }
         
-        T& operator[](std::size_t index) { return data[index]; }
-        const T& operator[](std::size_t index) const { return data[index]; }
+        T& operator[](std::size_t index) { return data[index % data.size()]; }
+        const T& operator[](std::size_t index) const { return data[index % data.size()]; }
         
         void clear()
         {
