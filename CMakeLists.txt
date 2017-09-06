@@ -17,7 +17,7 @@ endif()
 
 if(WIN32)
 	add_definitions(/std:c++latest /Wall /WX-)
-	include_directories("C:/Program Files (x86)/dsperados")
+	include_directories("C:/Program Files/dsperados")
 	install(FILES ${HEADERS} DESTINATION dsperados/octopus)
 endif(WIN32)
 

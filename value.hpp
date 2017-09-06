@@ -276,7 +276,7 @@ namespace octo
         
         //! Return a reference to the contained/referenced signal
         /*! @throw std::runtime_error if the value is a constant */
-        Signal<T>& getReference() const
+        Signal<T>& getReference()
         {
             switch (mode)
             {
@@ -285,6 +285,18 @@ namespace octo
                 case ValueMode::INTERNAL: return *internal;
             }
         }
+
+		//! Return a reference to the contained/referenced signal
+		/*! @throw std::runtime_error if the value is a constant */
+		const Signal<T>& getReference() const
+		{
+			switch (mode)
+			{
+			case ValueMode::CONSTANT: throw std::runtime_error("value is constant");
+			case ValueMode::REFERENCE: return *reference;
+			case ValueMode::INTERNAL: return *internal;
+			}
+		}
         
     public:
         //! A collection of listeners for Value events
@@ -292,6 +304,8 @@ namespace octo
         
     private:
         using Sink::setClock;
+
+		using ptr_type = Signal<T>*;
                               
         //! Deconstructs what's in the union
         /*! Internal use only. A new construction should take place immediately afterwards */
@@ -304,7 +318,7 @@ namespace octo
                     break;
                 case ValueMode::REFERENCE:
                     reference->dependees.erase(this);
-                    reference.~Signal<T>();
+                    reference.~ptr_type();
                     break;
                 case ValueMode::INTERNAL:
                     internal.~polymorphic_value();
@@ -321,7 +335,7 @@ namespace octo
             }
         }
         
-        const T& getOutput() const final
+        const T& getOutput() final
         {
             switch (mode)
             {
