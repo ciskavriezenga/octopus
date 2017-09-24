@@ -345,7 +345,7 @@ namespace octo
 			dirty = false;
         }
         
-        const T& getOutput() final
+        const T& getOutput() const final
         {
 			return cache;
         }

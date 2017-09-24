@@ -99,7 +99,7 @@ namespace octo
         
     private:
         //! Return the output value
-        virtual const T& getOutput() = 0;
+        virtual const T& getOutput() const = 0;
         
     private:
         //! A cache for previously generated samples
