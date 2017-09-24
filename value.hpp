@@ -292,9 +292,9 @@ namespace octo
 		{
 			switch (mode)
 			{
-			case ValueMode::CONSTANT: throw std::runtime_error("value is constant");
-			case ValueMode::REFERENCE: return *reference;
-			case ValueMode::INTERNAL: return *internal;
+				case ValueMode::CONSTANT: throw std::runtime_error("value is constant");
+				case ValueMode::REFERENCE: return *reference;
+				case ValueMode::INTERNAL: return *internal;
 			}
 		}
         
@@ -311,6 +311,7 @@ namespace octo
         /*! Internal use only. A new construction should take place immediately afterwards */
         void deconstruct()
         {
+			using ptr_type = Signal<T>*;
             switch (mode)
             {
                 case ValueMode::CONSTANT:
@@ -328,21 +329,25 @@ namespace octo
         
         void onUpdate() final
         {
-            if (mode == ValueMode::CONSTANT && dirty)
-            {
-                dirty = false;
-                cache = constant;
-            }
+			switch (mode)
+			{
+			case ValueMode::CONSTANT:
+				cache = constant;
+				break;
+			case ValueMode::REFERENCE:
+				cache = reference->pull();
+				break;
+			case ValueMode::INTERNAL:
+				cache = internal->pull();
+				break;
+			}
+
+			dirty = false;
         }
         
         const T& getOutput() final
         {
-            switch (mode)
-            {
-                case ValueMode::CONSTANT: return cache;
-                case ValueMode::REFERENCE: return (*reference)();
-                case ValueMode::INTERNAL: return (*internal)();
-            }
+			return cache;
         }
         
         //! Reset the value, because the referenced signal will be destructed
