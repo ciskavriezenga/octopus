@@ -226,8 +226,33 @@ namespace octo
             switch (rhs.mode)
             {
                 case ValueMode::CONSTANT: return *this = rhs.constant;
-                case ValueMode::REFERENCE: return *this = rhs.reference;
-                case ValueMode::INTERNAL: return *this = rhs.internal;
+                case ValueMode::REFERENCE:
+                {
+                    deconstruct();
+                    
+                    mode = ValueMode::REFERENCE;
+                    new (&this->reference) Signal<T>*(rhs.reference);
+                    
+                    reference->dependees.emplace(this);
+                    setClock(reference->getClock());
+                    
+                    notifySignalSet();
+                    
+                    return *this;
+                }
+                    
+                case ValueMode::INTERNAL:
+                {
+                    deconstruct();
+                    
+                    mode = ValueMode::INTERNAL;
+                    new (&this->internal) polymorphic_value<T>(rhs.internal);
+                    setClock(internal->getClock());
+                    
+                    notifySignalSet();
+                    
+                    return *this;
+                }
             }
         }
         
@@ -239,9 +264,35 @@ namespace octo
             
             switch (rhs.mode)
             {
-                case ValueMode::CONSTANT: *this = std::move(rhs.constant);
-                case ValueMode::REFERENCE: *this = std::move(rhs.reference);
-                case ValueMode::INTERNAL: *this = std::move(rhs.internal);
+                case ValueMode::CONSTANT: return *this = std::move(rhs.constant);
+                case ValueMode::REFERENCE:
+                {
+                    deconstruct();
+                    
+                    mode = ValueMode::REFERENCE;
+                    new (&this->reference) Signal<T>*(rhs.reference);
+                    
+                    reference->dependees.emplace(this);
+                    setClock(reference->getClock());
+                    
+                    notifySignalSet();
+                    
+                    return *this;
+                }
+                    
+                case ValueMode::INTERNAL:
+                {
+                    deconstruct();
+                    
+                    mode = ValueMode::INTERNAL;
+                    new (&this->internal) polymorphic_value<T>();
+                    swap(internal, rhs.internal);
+                    setClock(internal->getClock());
+                    
+                    notifySignalSet();
+                    
+                    return *this;
+                }
             }
         }
         
