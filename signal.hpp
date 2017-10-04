@@ -44,7 +44,7 @@ namespace octo
         information), which it will use for time keeping.
      
         @code{.cpp}
-        InvariableClock clock;
+        StableClock clock;
         Sine<float> sine(clock);
         @endcode
      

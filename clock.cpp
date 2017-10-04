@@ -67,24 +67,24 @@ namespace octo
         return persistentSinks.count(const_cast<Sink*>(&sink));
     }
     
-// --- InvariableClock --- //
+// --- StableClock --- //
 
-    InvariableClock::InvariableClock(float rateInHertz) :
+    StableClock::StableClock(float rateInHertz) :
         rate_(rateInHertz)
     {
         
     }
     
-// --- VariableClock --- //
+// --- FluctuatingClock --- //
 
-    VariableClock::VariableClock(float maximalRate) :
+    FluctuatingClock::FluctuatingClock(float maximalRate) :
         maximalRate(maximalRate),
         rate_(maximalRate)
     {
         lastNow = std::chrono::high_resolution_clock::now();
     }
 
-    void VariableClock::ticked()
+    void FluctuatingClock::ticked()
     {
         auto now = high_resolution_clock::now();
         auto diff = duration_cast<std::chrono::duration<float>>(now - lastNow);
