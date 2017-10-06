@@ -38,7 +38,7 @@
 
 namespace octo
 {
-    //! Base class VariableClock and InvariableClock
+    //! Base class StableClock and FluctuatingClock
     class Clock
     {
     public:
@@ -86,20 +86,20 @@ namespace octo
     
     //! A clock with an invariable, constant rate
     /*! Clocks are used for keeping time with signals. Each signal compares its internal state
-     with the clock it was given. If it's not up to date, new sample data will be generated.
+        with the clock it was given. If it's not up to date, new sample data will be generated.
      
-     Invariable clocks are the most simple clocks available. You set their rate once, and
-     signals with an invariable clock attached can then request the rate whenever they need it.
-     A good example of a domain with an invariable clock would be audio. Although audio samples
-     are often not actuallt generated every 1/44100 second (they are generated in 'bursts' by the
-     audio callback), audio signals should operate as if the rate between every sample remains constant.
-     That is how they will be *played back* after all. */
-    class InvariableClock : public Clock
+        Stable clocks are the most simple clocks available. You set their rate once, and
+        signals with an invariable clock attached can then request the rate whenever they need it.
+        A good example of a domain with a stable clock would be audio. Although audio samples
+        are often not actuallt generated every 1/44100 second (they are generated in 'bursts' by the
+        audio callback), audio signals should operate as if the rate between every sample remains constant.
+        That is how they will be *played back* after all. */
+    class StableClock : public Clock
     {
     public:
         //! Construct the clock
         /*! @param rateInHertz The rate at which the clocks runs (changes only with setRate). */
-        InvariableClock(float rateInHertz);
+        StableClock(float rateInHertz);
         
         //! Set the sample rate of the clock (in Hertz)
         void setRate(float rateInHertz) { rate_ = rateInHertz; }
@@ -124,20 +124,20 @@ namespace octo
     
     //! A clock with a variable sample rate
     /*! Clocks are used for keeping time with signals. Each signal compares its internal state
-     with the clock it was given. If it's not up to date, new sample data will be generated.
+        with the clock it was given. If it's not up to date, new sample data will be generated.
      
-     Variable clocks automatically change their rate every time tick() is called, depending
-     on the elapsed time since the previous tick. A good example of a domain with a variable
-     clock would be video. The FPS (rate) in video applications changes every frame (some ticks
-     take longer than others). Signals attached to variable clocks can request the rate or
-     delta every frame anew and make sure they update themselves according to how much time the
-     last tick took. */
-    class VariableClock : public Clock
+        Fluctuating clocks automatically change their rate every time tick() is called, depending
+        on the elapsed time since the previous tick. A good example of a domain with a fluctuating
+        clock would be video. The FPS (rate) in video applications changes every frame (some ticks
+        take longer than others). Signals attached to fluctuating clocks can request the rate or
+        delta every frame anew and make sure they update themselves according to how much time the
+        last tick took. */
+    class FluctuatingClock : public Clock
     {
     public:
         //! Construct the clock
         /*! @param maximalRate The rate at which the clocks starts running (will be influenced by subsequent ticks) */
-        VariableClock(float maximalRate);
+        FluctuatingClock(float maximalRate);
         
         //! Return the rate at which the clock runs (in Hertz)
         float getRate() const final { return rate_; }
