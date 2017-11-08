@@ -26,8 +26,8 @@
  
  */
 
-#ifndef OCTOPUS_CORE_MODULO_HPP
-#define OCTOPUS_CORE_MODULO_HPP
+#ifndef OCTOPUS_MODULO_HPP
+#define OCTOPUS_MODULO_HPP
 
 #include <cmath>
 
@@ -40,7 +40,11 @@ namespace octo
     class Modulo : public BinaryOperation<T>
     {
     public:
-        using BinaryOperation<T>::BinaryOperation;
+        Modulo(Clock* clock) :
+            BinaryOperation<T>(clock, 0, 1)
+        {
+            
+        }
         
     private:
         /// Inherited from BinaryOperation
@@ -51,6 +55,7 @@ namespace octo
                 out = 0;
                 return;
             }
+            
             out = std::fmod(left, right);
         }
     };
