@@ -50,7 +50,7 @@ namespace octo
         
         //! Construct the binary operation with two terms and its own clock
         BinaryOperation(Clock* clock, Value<T> left, Value<T> right) :
-            Signal<T>(clock),
+            CachedSignal<T>(clock),
             left(std::move(left)),
             right(std::move(right))
         {
