@@ -383,13 +383,13 @@ namespace octo
 			switch (mode)
 			{
 			case ValueMode::CONSTANT:
-				cache = constant;
+				cache = &constant;
 				break;
 			case ValueMode::REFERENCE:
-				cache = reference->pull();
+				cache = &reference->pull();
 				break;
 			case ValueMode::INTERNAL:
-				cache = internal->pull();
+				cache = &internal->pull();
 				break;
 			}
 
@@ -398,7 +398,7 @@ namespace octo
         
         const T& getOutput() const final
         {
-			return cache;
+			return *cache;
         }
         
         //! Reset the value, because the referenced signal will be destructed
@@ -440,7 +440,7 @@ namespace octo
         };
         
         //! The actual cache that will be used for output
-        T cache;
+        T const* cache = nullptr;
         
         //! Should the cache be set to the new constant?
         bool dirty = false;
